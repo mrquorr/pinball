@@ -38,6 +38,14 @@ struct Vector {
 	float speed;
 };
 
+struct Flipper {
+    Point backLeft;
+    Point backRight;
+    Point frontLeft;
+    Point frontRight;
+    Point frontTop;
+};
+
 // Colors
 Color red, grey, dRed, gold, black, blue, green, white;
 
@@ -50,6 +58,20 @@ Point currentPosition, initialPosition, lastPosition;
 // Vectors
 Vector current;
 Vector initial;
+
+
+// Flippers
+Flipper rFlipper;
+Flipper lFlipper;
+int activateRFlipper=0;
+int activateLFlipper=0;
+int clockR = 0;
+int clockL = 0;
+int lockR = 0;
+int lockL = 0;
+int angleR = 0;
+int angleL = 0;
+
 
 // flipper variables
 float angle = 0.0;
@@ -93,15 +115,9 @@ int score = 0;
 width = 10
 length = 70
 */
-struct Flipper {
-    Point backLeft;
-    Point backRight;
-    Point frontLeft;
-    Point frontRight;
-    Point frontTop;
-};
 
-<<<<<<< HEAD
+
+
 /**
     Prints given string in the screen
 
@@ -453,7 +469,7 @@ void display(void)
 		ld = abs((14 * currentPosition.x) + (31 * currentPosition.y) - 2715) / 34.0147027;
 	}
 
-	drawFlipper(leftFlipper, 75, 15, blue); // draw the flipper
+
 	glPopMatrix();
 
 
