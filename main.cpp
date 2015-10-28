@@ -75,6 +75,9 @@ int angleL = 0;
 
 // flipper variables
 float angle = 0.0;
+float ld;
+float rd;
+
 const float ANGLE_CHANGE = 45;
 
 /// window stuff
@@ -227,7 +230,7 @@ void drawBumper(Point& p, float radius, Color& c ) {
     @param type switch the different type of collitions,
     1 = bumper (500), 2 = target (1000 score) 3 = top wall
     4 = side walls ,  5 = upper side wall, 6 = outher wall
-    7 = draw hole
+    7 = draw hole,    8 = flipper collision
 
 */
 void checkColission(Point &p, int type){
@@ -315,6 +318,15 @@ void checkColission(Point &p, int type){
                 currentPosition.x = 280;
                 currentPosition.y = 77;
                 vx = -vx;
+                vy = -vy;
+            }
+        }
+        break;
+
+        // flipper collision
+        case 8: {
+            if(ld <= 15 && (currentPosition.x >= 50 && currentPosition.x <= 112))
+            {
                 vy = -vy;
             }
         }
@@ -420,66 +432,12 @@ void drawFlipper( Color& c, Flipper& f ) {
 // display function
 void display(void)
 {
-	glutSetWindow(window);
+
 	glClear(GL_COLOR_BUFFER_BIT);
-	float ld;
-	float rd;
 
-
-
-
-	// white
-	Color white;
-	white.r = 1.0; white.g = 1.0; white.b = 1.0;
-
-	// DRAWING ALL OBJECTS
-	// background
 	drawRectangle(origin, 450, 300, dRed);
 
-	// Left Flipper
-
-	glPushMatrix();
-	glTranslatef(40,55,0);
-	glRotatef(-25,0,0,1);
-
-	if(GetAsyncKeyState(0x5A)&0x8000 && angle < 45.0)
-	{
-		glRotatef(ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-
-		leftRFlipperState.x = 105;
-		leftRFlipperState.y = 95;
-
-		leftLFlipperState.x = 50;
-		leftLFlipperState.y = 75;
-
-		ld = abs((4 * currentPosition.x) + (-11 * currentPosition.y) + 625) / 11.70469991;
-	}
-	else
-	{
-		if(angle > 0.0){
-			glRotatef(-ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-		}
-
-		leftRFlipperState.x = 112;
-		leftRFlipperState.y = 37;
-
-		leftLFlipperState.x = 50;
-		leftLFlipperState.y = 65;
-
-		ld = abs((14 * currentPosition.x) + (31 * currentPosition.y) - 2715) / 34.0147027;
-	}
-
-
-	glPopMatrix();
-
-
-	if(ld <= 15 && (currentPosition.x >= 50 && currentPosition.x <= 112))
-	{
-		vy = -vy;
-	}
-
 	drawFlipper(white, rFlipper);
-
 
 	// Right Flipper
 	glPushMatrix();
@@ -510,6 +468,7 @@ void display(void)
     checkColission(farRightWall, 6);
     checkColission(hole1, 7);
     checkColission(hole2, 7);
+    checkColission(currentPosition,8);
 
 
 	// ball
@@ -525,6 +484,7 @@ void display(void)
 
 
 	drawRectangle(insertWall,10,50,red); // wall under ball in starting position
+
 	// plunger mechanism
 	glBegin(GL_POLYGON);
 		glColor3f(1.0,1.0,1.0);
