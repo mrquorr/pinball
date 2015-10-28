@@ -1,8 +1,17 @@
-/*
- * Much thanks to Github user Skatrud, whos pinball
- * code gave us the base for this app.
- */
 
+/**
+    Graficos Computacionales
+    main.cpp
+    Purpose: Create a pinball game to be used by kids
+    with the theme of pregnancy
+
+    Much thanks to Github user Skatrud, whos pinball
+    code gave us the base for this app.
+
+    @author Emilio Flores A01035087
+    @author Sergio Cordero A01191167
+    @version 1.0 28/10/2015
+*/
 #include <windows.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -15,9 +24,8 @@
 #include <math.h>
 #include <iostream>
 
-using namespace::std;
+using namespace std;
 
-// colour struct for rgba colours
 struct Color {
 	float r;
 	float g;
@@ -25,14 +33,12 @@ struct Color {
 	float a;
 };
 
-// point struct
 struct Point {
 	float x;
 	float y;
 	float z;
 };
 
-// Vector struct
 struct Vector {
 	float angle;
 	float speed;
@@ -59,30 +65,9 @@ Point currentPosition, initialPosition, lastPosition;
 Vector current;
 Vector initial;
 
-
 // Flippers
 Flipper rFlipper;
 Flipper lFlipper;
-int activateRFlipper=0;
-int activateLFlipper=0;
-int clockR = 0;
-int clockL = 0;
-int lockR = 0;
-int lockL = 0;
-float angleR = 25.0;
-float angleL = 25.0;
-
-// flipper variables
-float angle = 0.0;
-const float ANGLE_CHANGE = 45;
-
-/// window stuff
-int window; // main window id
-const int BALL_SIZE = 7;
-const float PI = 3.141592;
-const int ANIMATION_TIME = 20;
-const int screenHeight = 500, screenWidth = 300;
-const int circleRadius = 7;
 
 // physics variables
 float g = .00002;
@@ -93,27 +78,35 @@ float initVelY = 0;
 float currVelY = 0;
 float vx = 0;
 float vy = 0;
+float ld, rd;
+float acc = 0;
+float launch = 0;
+
+
+const float ANGLE_CHANGE = 45;
+const float PI = 3.141592;
+const int BALL_SIZE = 7;
+const int ANIMATION_TIME = 20;
+const int screenHeight = 500;
+const int screenWidth = 300;
+const int circleRadius = 7;
 
 // mouse variables
 int dragging = 0;
 int mousePressed = 0;
 int mouseX = 0;
 int mouseY = 0;
-
-// Misc.
 int ballCounter = 5;
-float acc = 0;
-float launch = 0;
 int score = 0;
-
-// keyboard variables
-//int lFlipper = 0;
-//int rFlipper = 0;
-
-/* flipper struct
-width = 10
-length = 70
-*/
+//flipper values
+int activateRFlipper=0;
+int activateLFlipper=0;
+int clockR = 0;
+int clockL = 0;
+int lockR = 0;
+int lockL = 0;
+float angleR = 25.0;
+float angleL = 25.0;
 
 
 
@@ -156,48 +149,7 @@ void drawCircle(Point& p, float radius, Color& c ) {
 
 
 	lastPosition = p;
-	if((p.y < 1 || p.x > 300 || p.y > 440) && ballCounter > 0)
-	{
-		ballCounter--;
-		p.x = 280;
-		p.y = 77;
-		vx = -vx;
-		vy = -vy;
-	}
-    // If the ball is in the launching platform
-	if(p.x > 262)
-	{
-	    // This is if the ball is still in the launching platform
-		if(p.y >= 420)
-		{
-			vx = vy;
 
-			p.x -= vx;
-		}
-		else
-		{
-		    // Launch the ball with that force depending on the launch
-			vy = 0;
-			vy += (launch/2000);
-			p.y += vy;
-		}
-	}
-	else
-	{
-		acc = 0;
-		p.x -= vx;
-        // Caida
-		if(vy > 0){
-			vy += g;
-			vy -= f;
-		}
-		// Subiendo
-		else if(vy < 0){
-			vy -= g;
-			vy += f;
-		}
-		p.y -= vy;
-	}
 }
 
 /**
@@ -226,7 +178,7 @@ void drawBumper(Point& p, float radius, Color& c ) {
     @param type switch the different type of collitions,
     1 = bumper (500), 2 = target (1000 score) 3 = top wall
     4 = side walls ,  5 = upper side wall, 6 = outher wall
-    7 = draw hole
+    7 = draw hole,   8 = circle collision
 
 */
 void checkColission(Point &p, int type){
@@ -319,6 +271,55 @@ void checkColission(Point &p, int type){
         }
         break;
 
+        // circle collision
+        case 8: {
+            if((p.y < 1 || p.x > 300 || p.y > 440) && ballCounter > 0)
+            {
+                ballCounter--;
+                p.x = 280;
+                p.y = 77;
+                vx = -vx;
+                vy = -vy;
+            }
+            // If the ball is in the launching platform
+            if(p.x > 262)
+            {
+                // This is if the ball is still in the launching platform
+                if(p.y >= 420)
+                {
+                    vx = vy;
+
+                    p.x -= vx;
+                }
+                else
+                {
+                    // Launch the ball with that force depending on the launch
+                    vy = 0;
+                    vy += (launch/2000);
+                    p.y += vy;
+                }
+            }
+            else
+            {
+                acc = 0;
+                p.x -= vx;
+                // Caida
+                if(vy > 0){
+                    vy += g;
+                    vy -= f;
+                }
+                // Subiendo
+                else if(vy < 0){
+                    vy -= g;
+                    vy += f;
+                }
+                p.y -= vy;
+            }
+        }
+        break;
+
+
+
     }
 
 }
@@ -399,7 +400,12 @@ void drawWall(Point& p, float height, float width, Color& c ) {
 	glEnd();
 }
 
-// Flipper
+/**
+    Function that draws a given flipper
+
+    @param c Color structure containing r,g,b
+    @param f Flipper structure containing the values of the flipper.
+*/
 void drawFlipper( Color& c, Flipper& f ) {
 
     //define flipper color
@@ -416,76 +422,22 @@ void drawFlipper( Color& c, Flipper& f ) {
 
 }
 
-// display function
+/**
+    Function used as Display. Called every time there
+    is a change that needs to be displayed
+*/
 void display(void)
 {
-	glutSetWindow(window);
+
 	glClear(GL_COLOR_BUFFER_BIT);
-	float ld;
-	float rd;
 
 
 
 
-	// white
-	Color white;
-	white.r = 1.0; white.g = 1.0; white.b = 1.0;
-
-	// DRAWING ALL OBJECTS
-	// background
 	drawRectangle(origin, 450, 300, dRed);
-
-	// Left Flipper
-
-	glPushMatrix();
-	glTranslatef(40,55,0);
-	glRotatef(-25,0,0,1);
-
-	if(GetAsyncKeyState(0x5A)&0x8000 && angle < 45.0)
-	{
-		glRotatef(ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-
-		leftRFlipperState.x = 105;
-		leftRFlipperState.y = 95;
-
-		leftLFlipperState.x = 50;
-		leftLFlipperState.y = 75;
-
-		ld = abs((4 * currentPosition.x) + (-11 * currentPosition.y) + 625) / 11.70469991;
-	}
-	else
-	{
-		if(angle > 0.0){
-			glRotatef(-ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-		}
-
-		leftRFlipperState.x = 112;
-		leftRFlipperState.y = 37;
-
-		leftLFlipperState.x = 50;
-		leftLFlipperState.y = 65;
-
-		ld = abs((14 * currentPosition.x) + (31 * currentPosition.y) - 2715) / 34.0147027;
-	}
-
-
-	glPopMatrix();
-
-
-	if(ld <= 15 && (currentPosition.x >= 50 && currentPosition.x <= 112))
-	{
-		vy = -vy;
-	}
-
-
-
-
-	// Right Flipper
-	glPushMatrix();
-        glTranslatef(220,50,0);
-        glRotatef(25,0,0,1);
-        //drawFlipper(blue, lFlipper);
-	glPopMatrix();
+	//draw flippers
+	drawFlipper(white, lFlipper);
+	drawFlipper(white, rFlipper);
 
 	// obstacles
 	drawBumper(bumper1,15,gold); // bumper1
@@ -494,10 +446,16 @@ void display(void)
 	drawTarget(target2, 5, 20, green); // target2
 	drawHole(hole1,10,black); // hole1
 	drawHole(hole2,10,black); // hole2
+	drawCircle(currentPosition,circleRadius,grey); // the pinball
+	drawWall(upperWall,10,300,red); // top wall
+	drawWall(leftWall,440,10,red); // left playspace wall
+	drawWall(holeWallLeft,110,10,red); // left hole wall
+	drawWall(holeWallRight,110,10,red); // right hole wall
+	drawWall(rightWall,400,10,red); // right playspace wall
+	drawWall(farRightWall,440,290,red); // far right wall
+	drawRectangle(insertWall,10,50,red); // wall under ball in starting position
 
-    // colissions
-
-	checkColission(bumper1, 1);
+    checkColission(bumper1, 1);
 	checkColission(bumper2, 1);
 	checkColission(target1, 2);
 	checkColission(target2, 2);
@@ -509,24 +467,12 @@ void display(void)
     checkColission(farRightWall, 6);
     checkColission(hole1, 7);
     checkColission(hole2, 7);
+    checkColission(currentPosition, 8);
 
 
-	// ball
-	drawCircle(currentPosition,circleRadius,grey); // the pinball
-
-	// walls
-	drawWall(upperWall,10,300,red); // top wall
-	drawWall(leftWall,440,10,red); // left playspace wall
-	drawWall(holeWallLeft,110,10,red); // left hole wall
-	drawWall(holeWallRight,110,10,red); // right hole wall
-	drawWall(rightWall,400,10,red); // right playspace wall
-	drawWall(farRightWall,440,290,red); // far right wall
-
-
-	drawRectangle(insertWall,10,50,red); // wall under ball in starting position
 	// plunger mechanism
 	glBegin(GL_POLYGON);
-		glColor3f(1.0,1.0,1.0);
+		glColor3f(white.r,white.g, white.b);
 		glVertex2f(270,60);
 		glVertex2f(290,60);
 		if(dragging)
@@ -559,19 +505,24 @@ void display(void)
 	bs << "Balls: " << ballCounter;
 	output(200,460,white,bs.str().c_str());
 
-	drawFlipper(white, lFlipper);
-	drawFlipper(white, rFlipper);
-
 	glutSwapBuffers();
 }
 
+/**
+    Function to be used when there is nothing going on
+
+
+*/
 void idle (void)
 {
     //  Call display function (draw the current frame)
     glutPostRedisplay ();
 }
-
-void flipperPositions(){
+/**
+    Function used to initialize all of the positions
+    of the flippers
+*/
+void flipperPositions(void){
     //right flipper positions
         rFlipper.backLeft.x = 230;
         rFlipper.backLeft.y = 50;
@@ -605,7 +556,10 @@ void flipperPositions(){
         lFlipper.frontLeft.y = 50 + cos((90+angleL)*(PI/180.0))*80;
 }
 
-// initializes openGL, glut, and glui
+/**
+    Function used to initialize OpenGL, GLU and
+    global variables used in the code
+*/
 void init(void)
 {
     red.r = 1.0f; red.g = 0.0f; red.b = 0.0f;
@@ -654,7 +608,14 @@ void init(void)
 	flipperPositions();
 }
 
-// checks mouse button press
+/**
+    Function used to check if the mouse was pressed
+
+    @param button left mouse button
+    @param state
+    @param x position of the click
+    @param y position of the click
+*/
 void mousePress( int button, int state, int x, int y) {
 	if (button != 0 ) {  // left mouse button pressed?
 		mousePressed = 1;
@@ -664,7 +625,13 @@ void mousePress( int button, int state, int x, int y) {
 	}
 }
 
-// says whether the mouse is dragging or not
+/**
+    Function used to check if the mouse is dragged
+
+
+    @param x position of the drag
+    @param y position of the drag
+*/
 void mouseDrag( int x, int y) {
 
 	mousePressed = 1;
@@ -673,7 +640,13 @@ void mouseDrag( int x, int y) {
 	mouseY = y;
 }
 
-// this sets the mouse position in window
+/**
+    Function to check the position of the mouse
+    at any time.
+
+    @param x position of mouse in x axis at any time
+    @param y position of mouse in y axis at any time
+*/
 void mouseMovement( int x, int y) {
 
 	mousePressed = 0;
@@ -682,18 +655,37 @@ void mouseMovement( int x, int y) {
 	mouseY = y;
 }
 
-void activateLeftFlipper(){
-    if(lockL != 1){
-        activateLFlipper = 1;
+
+/**
+    Function used to activate any of the flippers
+
+    @param type flipper to check.
+            1 = left, 2 = right
+*/
+void activateFlipper(int type){
+    switch (type) {
+        case 1: {
+            if(lockL != 1){
+                activateLFlipper = 1;
+            }
+        }
+        break;
+
+        case 2: {
+            if(lockR != 1){
+                activateRFlipper = 1;
+            }
+        }
+        break;
     }
 }
 
-void activateRightFlipper(){
-    if(lockR != 1){
-        activateRFlipper = 1;
-    }
-}
 
+/**
+    Timer function used in this code.
+
+    @param v input parameter if needed
+*/
 void myTimer(int v){
     if(activateRFlipper == 1){
         flipperPositions();
@@ -732,7 +724,16 @@ void myTimer(int v){
     glutTimerFunc(5, myTimer, 1);
 
 }
+/**
+    Keyboard function used in the code.
+    If f is pressed, activate left flipper
+    If j is pressed, activate right flipper
+    If e is pressed, exit
 
+    @param theKey unsigned char representing the key pressed
+    @param mouseX position of the mouse in x axis
+    @param mouseY position of the mouse in y axis
+*/
 void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
 {
     GLint x = mouseX;
@@ -741,11 +742,11 @@ void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
     {
     case 'f':
     case 'F':
-        activateLeftFlipper();
+        activateFlipper(1);
         break;
     case 'j':
     case 'J':
-        activateRightFlipper();
+        activateFlipper(2);
         break;
     case 'e':
     case 'E':
@@ -764,16 +765,14 @@ int main(int argc, char *argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB );
 	glutInitWindowSize(screenWidth, screenHeight);
-	window = glutCreateWindow("Skatrud Pinball");
+	glutCreateWindow("Pinball");
 	glutDisplayFunc(display);
 	glutIdleFunc(idle);
-
 	glutMouseFunc( mousePress );
 	glutMotionFunc(mouseDrag);
 	glutPassiveMotionFunc( mouseMovement );
 	glutTimerFunc(5, myTimer, 1);
 	glutKeyboardFunc(myKeyboard);
-
 	init();
 	glutMainLoop();
 	return 0;
