@@ -86,11 +86,22 @@ float launch = 0;
 int score = 0;
 
 // keyboard variables
-int lFlipper = 0;
-int rFlipper = 0;
+//int lFlipper = 0;
+//int rFlipper = 0;
 
+/* flipper struct
+width = 10
+length = 70
+*/
+struct Flipper {
+    Point backLeft;
+    Point backRight;
+    Point frontLeft;
+    Point frontRight;
+    Point frontTop;
+};
 
-
+<<<<<<< HEAD
 /**
     Prints given string in the screen
 
@@ -374,11 +385,20 @@ void drawWall(Point& p, float height, float width, Color& c ) {
 }
 
 // Flipper
-void drawFlipper( Point& p, float segmentWidth, float segmentHeight, Color& c ) {
-	Point current;
-	current.x = p.x+segmentHeight/2;
-	current.y = p.y;
-	drawRectangle(current, segmentHeight, segmentWidth-segmentHeight/2, c);
+void drawFlipper( Color& c, Flipper& f ) {
+
+    //define flipper color
+    glColor3f(c.r, c.g, c.b);
+
+	glBegin(GL_POLYGON);
+        //define vertices as the flipper's position
+        glVertex2f(f.backLeft.x, f.backLeft.y);
+        glVertex2f(f.backRight.x, f.backRight.y);
+        glVertex2f(f.frontRight.x, f.frontRight.y);
+        glVertex2f(f.frontTop.x, f.frontTop.y);
+        glVertex2f(f.frontLeft.x, f.frontLeft.y);
+    glEnd();
+
 }
 
 // display function
@@ -392,11 +412,16 @@ void display(void)
 
 
 
+	// white
+	Color white;
+	white.r = 1.0; white.g = 1.0; white.b = 1.0;
+
 	// DRAWING ALL OBJECTS
 	// background
 	drawRectangle(origin, 450, 300, dRed);
 
 	// Left Flipper
+
 	glPushMatrix();
 	glTranslatef(40,55,0);
 	glRotatef(-25,0,0,1);
@@ -437,44 +462,15 @@ void display(void)
 		vy = -vy;
 	}
 
+	drawFlipper(white, rFlipper);
+
+
 	// Right Flipper
 	glPushMatrix();
-	glTranslatef(220,50,0);
-	glRotatef(25,0,0,1);
-
-	if(GetAsyncKeyState(0xBF)&0x8000 && angle < 45.0)
-	{
-		glRotatef(-ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-
-		rightLFlipperState.x = 170;
-		rightLFlipperState.y = 85;
-
-		rightRFlipperState.x = 220;
-		rightRFlipperState.y = 67;
-
-		rd = abs((9 * currentPosition.x) + (25 * currentPosition.y) - 3655) / 26.57066051;
-	}
-	else
-	{
-		if(angle > 0.0){
-			glRotatef(ANGLE_CHANGE,0,0,1);  // rotate n degrees around z axis
-		}
-		rightLFlipperState.x = 160;
-		rightLFlipperState.y = 37;
-
-		rightRFlipperState.x = 220;
-		rightRFlipperState.y = 67;
-
-		rd = abs((1 * currentPosition.x) + (-2 * currentPosition.y) - 86) / 2.236067977;
-	}
-
-	drawFlipper(rightFlipper, -60, 15, blue);
+        glTranslatef(220,50,0);
+        glRotatef(25,0,0,1);
+        //drawFlipper(blue, lFlipper);
 	glPopMatrix();
-
-	if(rd <= 15 && (currentPosition.x >= 160 && currentPosition.x <= 220))
-	{
-		vy = -vy;
-	}
 
 	// obstacles
 	drawBumper(bumper1,15,gold); // bumper1
@@ -498,6 +494,7 @@ void display(void)
     checkColission(farRightWall, 6);
     checkColission(hole1, 7);
     checkColission(hole2, 7);
+
 
 	// ball
 	drawCircle(currentPosition,circleRadius,grey); // the pinball
@@ -556,6 +553,43 @@ void idle (void)
     glutPostRedisplay ();
 }
 
+void flipperPositions(){
+    //right flipper positions
+        //angulo 345
+        rFlipper.backLeft.x = 40;
+        rFlipper.backLeft.y = 50;
+
+        rFlipper.backRight.x = 40 + sin(15)*10;
+        rFlipper.backRight.y = 60 - cos(15)*10;
+
+        rFlipper.frontRight.x = 120 + sin(15)*(sqrt(10*10 + 80*80));
+        rFlipper.frontRight.y = 60 + cos(15)*(sqrt(10*10 + 80*80));
+        //rFlipper.frontRight.x = 120;
+        //rFlipper.frontRight.y = 60;
+
+        rFlipper.frontTop.x = 125;
+        rFlipper.frontTop.y = 55;
+
+        rFlipper.frontLeft.x = 120;
+        rFlipper.frontLeft.y = 50;
+
+    //left flipper positions
+        lFlipper.backLeft.x = 200;
+        lFlipper.backLeft.y = 200;
+
+        lFlipper.backRight.x = 210;
+        lFlipper.backRight.y = 200;
+
+        lFlipper.frontRight.x = 210;
+        lFlipper.frontRight.y = 260;
+
+        lFlipper.frontTop.x = 205;
+        lFlipper.frontTop.y = 270;
+
+        lFlipper.frontLeft.x = 200;
+        lFlipper.frontLeft.y = 260;
+}
+
 // initializes openGL, glut, and glui
 void init(void)
 {
@@ -602,6 +636,7 @@ void init(void)
     glOrtho(0, screenWidth, 0, screenHeight, 0, 1);
 	initialPosition.x = 280;	initialPosition.y = 77;
 	currentPosition = initialPosition;
+	flipperPositions();
 }
 
 // checks mouse button press
@@ -633,11 +668,52 @@ void mouseMovement( int x, int y) {
 }
 
 void activateLeftFlipper(){
-    lFlipper = 1;
+    if(lockL != 1){
+        activateLFlipper = 1;
+    }
 }
 
 void activateRightFlipper(){
-    rFlipper = 1;
+    if(lockR != 1){
+        activateRFlipper = 1;
+    }
+}
+
+void myTimer(int v){
+    if(activateRFlipper == 1){
+        lockR = 1;
+        clockR++;
+
+        if(clockR < 100){
+            angleR = 1;
+        } else if(clockR < 200){
+            angleR = -1;
+        } else if(clockR >= 200){
+            angleR = 0;
+            clockR = 0;
+            lockR = 0;
+            activateRFlipper = 0;
+        }
+        glutPostRedisplay();
+    }
+    if(activateLFlipper == 1){
+        lockL = 1;
+        clockL++;
+
+        if(clockL < 100){
+            angleL = 1;
+        } else if(clockL < 200){
+            angleL = -1;
+        } else if(clockL >= 200){
+            angleL = 0;
+            clockR = 0;
+            lockR = 0;
+            activateRFlipper = 0;
+        }
+        glutPostRedisplay();
+    }
+    glutTimerFunc(5, myTimer, 1);
+
 }
 
 void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
