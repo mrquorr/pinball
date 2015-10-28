@@ -14,8 +14,46 @@
 #include <sstream>
 #include <math.h>
 #include <iostream>
- 
+
 using namespace::std;
+
+// colour struct for rgba colours
+struct Color {
+	float r;
+	float g;
+	float b;
+	float a;
+};
+
+// point struct
+struct Point {
+	float x;
+	float y;
+	float z;
+};
+
+// Vector struct
+struct Vector {
+	float angle;
+	float speed;
+};
+
+// Colors
+Color red, grey, dRed, gold, black, blue, green, white;
+
+// Points
+Point origin, leftFlipper, rightFlipper, upperWall, leftWall,holeWallLeft;
+Point rightWall, farRightWall, holeWallRight, insertWall, bumper1, bumper2, target1, target2, hole1, hole2;
+Point leftLFlipperState, leftRFlipperState, rightLFlipperState, rightRFlipperState;
+Point currentPosition, initialPosition, lastPosition;
+
+// Vectors
+Vector current;
+Vector initial;
+
+// flipper variables
+float angle = 0.0;
+const float ANGLE_CHANGE = 45;
 
 /// window stuff
 int window; // main window id
@@ -23,6 +61,7 @@ const int BALL_SIZE = 7;
 const float PI = 22.0/7.0;
 const int ANIMATION_TIME = 20;
 const int screenHeight = 500, screenWidth = 300;
+const int circleRadius = 7;
 
 // physics variables
 float g = .00002;
@@ -50,88 +89,46 @@ int score = 0;
 int lFlipper = 0;
 int rFlipper = 0;
 
-// colour struct for rgba colours
-struct Color {
-	float r;
-	float g;
-	float b;
-	float a;
-};
 
-// point struct
-struct Point {
-	float x;
-	float y;
-	float z;
-};
 
-// Vector struct
-struct Vector {
-	float angle;
-	float speed;
-};
+/**
+    Prints given string in the screen
 
-// Points
-Point origin;
-Point leftFlipper;
-Point rightFlipper;
-Point upperWall;
-Point leftWall;
-Point holeWallLeft;
-Point rightWall;
-Point farRightWall;
-Point holeWallRight;
-Point insertWall;
-Point bumper1;
-Point bumper2;
-Point target1;
-Point target2;
-Point hole1;
-Point hole2;
+    @param x the position of x
+    @param y the position of y
+    @param color the Color structure to be usded
+    @param str character array that wants to be printed
 
-Point leftLFlipperState;
-Point leftRFlipperState;
-Point rightLFlipperState;
-Point rightRFlipperState;
-
-// Ball Points
-Point currentPosition;
-Point initialPosition;
-Point lastPosition;
-
-// Vector
-Vector current;
-Vector initial;
-
-// flipper variables
-float angle = 0.0;
-const float ANGLE_CHANGE = 45;
-
-// draw text
-void output(int x, int y, float r, float g, float b, const char *string)
+*/
+void output(int x, int y, Color color, const char *str)
 {
-  glColor3f( r, g, b );
+  glColor3f( color.r, color.g, color.b );
   glRasterPos2f(x, y);
   int len, i;
-  len = (int)strlen(string);
+  len = (int)strlen(str);
   for (i = 0; i < len; i++) {
-    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
   }
 }
 
-// draw the Pinball
+
+/**
+    Function that draws the circle in the screen given its position
+
+    @param p point in where the circle should be draw
+    @param radius of the circle to draw
+    @param c Color struct to paint the circle
+
+*/
 void drawCircle(Point& p, float radius, Color& c ) {
-	float delta_theta = 0.01;
+	float delta_theta = 0.03;
 	glColor3f(c.r, c.g, c.b);
 	glBegin( GL_POLYGON );
 	for( float angle = 0; angle < 2*PI; angle += delta_theta )
 		glVertex3f( radius*cos(angle)+p.x, radius*sin(angle)+p.y, 0 );
 	glEnd();
 
-	//cout << "y coordinate: " << p.y << endl;
-	//cout << "x coordinate: " << p.x << endl;
 
-    //ball falls
 	lastPosition = p;
 	if((p.y < 1 || p.x > 300 || p.y > 440) && ballCounter > 0)
 	{
@@ -141,16 +138,19 @@ void drawCircle(Point& p, float radius, Color& c ) {
 		vx = -vx;
 		vy = -vy;
 	}
-
+    // If the ball is in the launching platform
 	if(p.x > 262)
 	{
+	    // This is if the ball is still in the launching platform
 		if(p.y >= 420)
 		{
 			vx = vy;
+
 			p.x -= vx;
 		}
 		else
 		{
+		    // Launch the ball with that force depending on the launch
 			vy = 0;
 			vy += (launch/2000);
 			p.y += vy;
@@ -160,38 +160,31 @@ void drawCircle(Point& p, float radius, Color& c ) {
 	{
 		acc = 0;
 		p.x -= vx;
+        // Caida
 		if(vy > 0){
 			vy += g;
 			vy -= f;
 		}
+		// Subiendo
 		else if(vy < 0){
 			vy -= g;
 			vy += f;
-		}
-		else if(vx > 0){
-			vx -= f;
-		}
-		else if(vx < 0){
-			vx += f;
 		}
 		p.y -= vy;
 	}
 }
 
-// draws a bumper obstacle
+/**
+    Function that draws in the screen the bumper rectangle
+
+    @param p Point in which the bumper is located
+    @param radius of the bumper to draw
+    @param c Color structure containing r,g,b
+*/
 void drawBumper(Point& p, float radius, Color& c ) {
-	// Collision code
-	float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
-	if(d <= 22)
-	{
-		// do this when there is a collision
-		score += 500;
-		vx = -vx;
-		vy = -vy;
-	}
 
 	// draw circle
-	float delta_theta = 0.01;
+	float delta_theta = 0.03;
 	glColor3f(c.r, c.g, c.b);
 	glBegin( GL_POLYGON );
 	for( float angle = 0; angle < 2*PI; angle += delta_theta )
@@ -199,23 +192,121 @@ void drawBumper(Point& p, float radius, Color& c ) {
 	glEnd();
 }
 
-// draws a pitfall obstacle
+
+/**
+    Checks if the ball collided with a bumper
+
+    @param p Point from where the bumper is located
+    @param type switch the different type of collitions,
+    1 = bumper (500), 2 = target (1000 score) 3 = top wall
+    4 = side walls ,  5 = upper side wall, 6 = outher wall
+    7 = draw hole
+
+*/
+void checkColission(Point &p, int type){
+
+    switch (type) {
+        // Bumper
+        case 1: {
+
+             // Distance to bumper
+            float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
+
+            if(d <= 22)
+            {
+
+                // do this when there is a collision
+                score += 500;
+                vx = -vx;
+                vy = -vy;
+
+            }
+        }
+        break;
+        // target
+        case 2: {
+
+
+            if(p.y < currentPosition.y + 7 && (currentPosition.x > p.x && currentPosition.x < p.x + 20))
+            {
+                score += 1000;
+                vy = -vy;
+            }
+        }
+        break;
+        // top wall
+        case 3: {
+            if(p.y < currentPosition.y + 7)
+            {
+                vy = -vy;
+            }
+        }
+        break;
+
+        // side walls
+        case 4: {
+            if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
+            {
+                // do this when there is collision with side of wall
+
+                vx = -vx;
+            }
+        }
+        break;
+
+        // upper side wall
+        case 5: {
+            if(p.x < currentPosition.x + 7 && p.y + 400 > currentPosition.y)
+            {
+                // collision with side of wall
+                vx = -vx;
+            }
+        }
+        break;
+
+        // outher side wall
+        case 6: {
+            if(p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7)
+            {
+                // do this when there is collision with side of wall
+                vx = -vx;
+            }
+            else if(p.y + 440 < currentPosition.y - 7 || p.y > currentPosition.y + 7)
+            {
+                // do this when there is collision with top of wall
+                vy = -vy;
+            }
+        }
+        break;
+
+        case 7: {
+             float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
+             if (d <= 22 && ballCounter > 0) {
+                // do this when there is a collision and there are no more balls left
+                ballCounter--;
+                cout << "Ball Counter: " << ballCounter << endl;
+                currentPosition.x = 280;
+                currentPosition.y = 77;
+                vx = -vx;
+                vy = -vy;
+            }
+        }
+        break;
+
+    }
+
+}
+
+/**
+    Draws the hole in which the player looses one life
+
+    @param p Point in which hole is located
+    @param radius of the hole to draw
+    @param c Color structure containing r,g,b
+*/
 void drawHole(Point& p, float radius, Color& c ) {
-	// Collision code
-	float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
-	if(d <= 22 && ballCounter > 0)
-	{
-		// do this when there is a collision
-		ballCounter--;
-		cout << "Ball Counter: " << ballCounter << endl;
-		currentPosition.x = 280;
-		currentPosition.y = 77;
-		vx = -vx;
-		vy = -vy;
-	}
 
-	// draw circle
-	float delta_theta = 0.01;
+	float delta_theta = 0.03;
 	glColor3f(c.r, c.g, c.b);
 	glBegin( GL_POLYGON );
 	for( float angle = 0; angle < 2*PI; angle += delta_theta )
@@ -223,107 +314,53 @@ void drawHole(Point& p, float radius, Color& c ) {
 	glEnd();
 }
 
-// draws a target obstacle
+/**
+    Function that draws the target that gives 1000 score
+
+    @param p Point in which the target is defined
+    @param height of the target
+    @param width of the target
+    @param c Color to draw the target
+*/
 void drawTarget(Point& p, float height, float width, Color& c ) {
-	if(p.y < currentPosition.y + 7 && (currentPosition.x > p.x && currentPosition.x < p.x + 20))
-	{
-		score += 1000;
-		vy = -vy;
-	}
+
 	glColor3f(c.r, c.g, c.b);
 	glBegin( GL_POLYGON );
 	glVertex3f( p.x, p.y, 0 );
 	glVertex3f( p.x+width, p.y, 0 );
 	glVertex3f( p.x+width, p.y+height, 0 );
 	glVertex3f( p.x, p.y+height, 0 );
-	glVertex3f( p.x, p.y, 0 );
 	glEnd();
 }
 
-// draws a rectangle
+/**
+    Method used to draw every triangle of the game
+
+    @param p Point in which the rectangle should be
+    @param height of the rectangle
+    @param width of the rectangle
+    @param c Color structure in the form of r,g,b
+*/
 void drawRectangle(Point& p, float height, float width, Color& c ) {
+
 	glColor3f(c.r, c.g, c.b);
 	glBegin( GL_POLYGON );
 	glVertex3f( p.x, p.y, 0 );
 	glVertex3f( p.x+width, p.y, 0 );
 	glVertex3f( p.x+width, p.y+height, 0 );
 	glVertex3f( p.x, p.y+height, 0 );
-	glVertex3f( p.x, p.y, 0 );
 	glEnd();
 }
 
-// Outer side walls
-void drawWallS(Point& p, float height, float width, Color& c ) {
-	// handle collision
-	if(p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7)
-	{
-		// do this when there is collision with side of wall
-		vx = -vx;
-	}
-	else if(p.y + 440 < currentPosition.y - 7 || p.y > currentPosition.y + 7)
-	{
-		// do this when there is collision with top of wall
-		vy = -vy;
-	}
+/**
+    Function used to draw any wall given point and sizes
 
-	// draw rectangle
-	glColor3f(c.r, c.g, c.b);
-	glBegin( GL_POLYGON );
-	glVertex3f( p.x, p.y, 0 );
-	glVertex3f( p.x+width, p.y, 0 );
-	glVertex3f( p.x+width, p.y+height, 0 );
-	glVertex3f( p.x, p.y+height, 0 );
-	glVertex3f( p.x, p.y, 0 );
-	glEnd();
-}
-
-// Inner Side Walls
-void drawWallSM(Point& p, float height, float width, Color& c ) {
-	// handle collision
-	if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
-	{
-		// do this when there is collision with side of wall
-		vx = -vx;
-	}
-
-	// draw rectangle
-	glColor3f(c.r, c.g, c.b);
-	glBegin( GL_POLYGON );
-	glVertex3f( p.x, p.y, 0 );
-	glVertex3f( p.x+width, p.y, 0 );
-	glVertex3f( p.x+width, p.y+height, 0 );
-	glVertex3f( p.x, p.y+height, 0 );
-	glVertex3f( p.x, p.y, 0 );
-	glEnd();
-}
-
-// Insert Side Wall
-void drawWallIS(Point& p, float height, float width, Color& c ) {
-	// handle collision
-	if(p.x < currentPosition.x + 7 && p.y + 400 > currentPosition.y)
-	{
-		// collision with side of wall
-		vx = -vx;
-	}
-
-	// draw rectangle
-	glColor3f(c.r, c.g, c.b);
-	glBegin( GL_POLYGON );
-	glVertex3f( p.x, p.y, 0 );
-	glVertex3f( p.x+width, p.y, 0 );
-	glVertex3f( p.x+width, p.y+height, 0 );
-	glVertex3f( p.x, p.y+height, 0 );
-	glVertex3f( p.x, p.y, 0 );
-	glEnd();
-}
-
-// Top Wall
-void drawWallTB(Point& p, float height, float width, Color& c ) {
-	// handle collision
-	if(p.y < currentPosition.y + 7)
-	{
-		vy = -vy;
-	}
+    @param p Point in which the rectangle should be
+    @param height of the rectangle
+    @param width of the rectangle
+    @param c Color structure in the form of r,g,b
+*/
+void drawWall(Point& p, float height, float width, Color& c ) {
 
 	// draw rectangle
 	glColor3f(c.r, c.g, c.b);
@@ -352,58 +389,8 @@ void display(void)
 	float ld;
 	float rd;
 
-	// POINT LOCATIONS
-	origin.x = 0; origin.y = 0;
 
-	// flippers
-	leftFlipper.x = 0;	leftFlipper.y = 0;
-	rightFlipper.x = 0; rightFlipper.y = 0;
 
-	// walls
-	upperWall.x = 0;	upperWall.y = 440;
-	leftWall.x = 0;	leftWall.y = 0;
-	holeWallLeft.x = 40; holeWallLeft.y = 0;
-	holeWallRight.x = 222; holeWallRight.y = 0;
-	rightWall.x = 260;	rightWall.y = 0;
-	farRightWall.x = 290; farRightWall.y = 0;
-	insertWall.x = 260; insertWall.y = 60;
-
-	// obstacles
-	bumper1.x = 65; bumper1.y = 270;
-	bumper2.x = 210; bumper2.y = 270;
-	target1.x = 110; target1.y = 435;
-	target2.x = 145; target2.y = 435;
-	hole1.x = 25; hole1.y = 10;
-	hole2.x = 245; hole2.y = 10;
-
-	// COLOR
-	// red
-	Color red;
-	red.r = 1.0f; red.g = 0.0f; red.b = 0.0f;
-
-	// grey
-	Color grey;
-	grey.r = 0.827451; grey.g = 0.827451; grey.b = 0.827451;
-
-	// dark red
-	Color dRed;
-	dRed.r = 0.545098; dRed.g = 0; dRed.b = 0;
-
-	// gold
-	Color gold;
-	gold.r = 0.721569; gold.g = 0.52549; gold.b = 0.0431373;
-
-	// black
-	Color black;
-	black.r = 0.0; black.g = 0.0; black.b = 0.0;
-
-	// blue
-	Color blue;
-	blue.r = 0.372549; blue.g = 0.619608; blue.b = 0.627451;
-
-	// green
-	Color green;
-	green.r = 0.180392; green.g = 0.545098; green.b = 0.341176;
 
 	// DRAWING ALL OBJECTS
 	// background
@@ -443,6 +430,7 @@ void display(void)
 
 	drawFlipper(leftFlipper, 75, 15, blue); // draw the flipper
 	glPopMatrix();
+
 
 	if(ld <= 15 && (currentPosition.x >= 50 && currentPosition.x <= 112))
 	{
@@ -496,15 +484,33 @@ void display(void)
 	drawHole(hole1,10,black); // hole1
 	drawHole(hole2,10,black); // hole2
 
+    // colissions
+
+	checkColission(bumper1, 1);
+	checkColission(bumper2, 1);
+	checkColission(target1, 2);
+	checkColission(target2, 2);
+    checkColission(upperWall,3);
+    checkColission(holeWallLeft,4);
+	checkColission(holeWallRight,4);
+    checkColission(rightWall, 5);
+    checkColission(leftWall, 6);
+    checkColission(farRightWall, 6);
+    checkColission(hole1, 7);
+    checkColission(hole2, 7);
+
 	// ball
-	drawCircle(currentPosition,7,grey); // the pinball
+	drawCircle(currentPosition,circleRadius,grey); // the pinball
+
 	// walls
-	drawWallTB(upperWall,10,300,red); // top wall
-	drawWallS(leftWall,440,10,red); // left playspace wall
-	drawWallSM(holeWallLeft,110,10,red); // left hole wall
-	drawWallSM(holeWallRight,110,10,red); // right hole wall
-	drawWallIS(rightWall,400,10,red); // right playspace wall
-	drawWallS(farRightWall,440,290,red); // far right wall
+	drawWall(upperWall,10,300,red); // top wall
+	drawWall(leftWall,440,10,red); // left playspace wall
+	drawWall(holeWallLeft,110,10,red); // left hole wall
+	drawWall(holeWallRight,110,10,red); // right hole wall
+	drawWall(rightWall,400,10,red); // right playspace wall
+	drawWall(farRightWall,440,290,red); // far right wall
+
+
 	drawRectangle(insertWall,10,50,red); // wall under ball in starting position
 	// plunger mechanism
 	glBegin(GL_POLYGON);
@@ -535,11 +541,11 @@ void display(void)
 
 	stringstream ss;
 	ss << "Score: " << score;
-	output(10,460,1.0,1.0,1.0,ss.str().c_str());
+	output(10,460,white,ss.str().c_str());
 
 	stringstream bs;
 	bs << "Balls: " << ballCounter;
-	output(200,460,1.0,1.0,1.0,bs.str().c_str());
+	output(200,460,white,bs.str().c_str());
 
 	glutSwapBuffers();
 }
@@ -553,6 +559,40 @@ void idle (void)
 // initializes openGL, glut, and glui
 void init(void)
 {
+    red.r = 1.0f; red.g = 0.0f; red.b = 0.0f;
+    grey.r = 0.827451; grey.g = 0.827451; grey.b = 0.827451;
+    dRed.r = 0.545098; dRed.g = 0; dRed.b = 0;
+    gold.r = 0.721569; gold.g = 0.52549; gold.b = 0.0431373;
+    black.r = 0.0; black.g = 0.0; black.b = 0.0;
+    blue.r = 0.372549; blue.g = 0.619608; blue.b = 0.627451;
+    green.r = 0.180392; green.g = 0.545098; green.b = 0.341176;
+    white.r = 1.0f; white.g = 1.0f; white.b = 1.0f;
+
+    // POINT LOCATIONS
+	origin.x = 0; origin.y = 0;
+
+	// flippers
+	leftFlipper.x = 0;	leftFlipper.y = 0;
+	rightFlipper.x = 0; rightFlipper.y = 0;
+
+	// walls
+	upperWall.x = 0;	upperWall.y = 440;
+	leftWall.x = 0;	leftWall.y = 0;
+	holeWallLeft.x = 40; holeWallLeft.y = 0;
+	holeWallRight.x = 222; holeWallRight.y = 0;
+	rightWall.x = 260;	rightWall.y = 0;
+	farRightWall.x = 290; farRightWall.y = 0;
+	insertWall.x = 260; insertWall.y = 60;
+
+	// obstacles
+	bumper1.x = 65; bumper1.y = 270;
+	bumper2.x = 210; bumper2.y = 270;
+	target1.x = 110; target1.y = 435;
+	target2.x = 145; target2.y = 435;
+	hole1.x = 25; hole1.y = 10;
+	hole2.x = 245; hole2.y = 10;
+
+
     glClearColor (0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 0.0, 0.0);
