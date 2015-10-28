@@ -69,9 +69,8 @@ int clockR = 0;
 int clockL = 0;
 int lockR = 0;
 int lockL = 0;
-int angleR = 0;
-int angleL = 0;
-
+float angleR = 25.0;
+float angleL = 25.0;
 
 // flipper variables
 float angle = 0.0;
@@ -80,7 +79,7 @@ const float ANGLE_CHANGE = 45;
 /// window stuff
 int window; // main window id
 const int BALL_SIZE = 7;
-const float PI = 22.0/7.0;
+const float PI = 3.141592;
 const int ANIMATION_TIME = 20;
 const int screenHeight = 500, screenWidth = 300;
 const int circleRadius = 7;
@@ -478,7 +477,7 @@ void display(void)
 		vy = -vy;
 	}
 
-	drawFlipper(white, rFlipper);
+
 
 
 	// Right Flipper
@@ -560,6 +559,9 @@ void display(void)
 	bs << "Balls: " << ballCounter;
 	output(200,460,white,bs.str().c_str());
 
+	drawFlipper(white, lFlipper);
+	drawFlipper(white, rFlipper);
+
 	glutSwapBuffers();
 }
 
@@ -571,39 +573,36 @@ void idle (void)
 
 void flipperPositions(){
     //right flipper positions
-        //angulo 345
-        rFlipper.backLeft.x = 40;
+        rFlipper.backLeft.x = 230;
         rFlipper.backLeft.y = 50;
 
-        rFlipper.backRight.x = 40 + sin(15)*10;
-        rFlipper.backRight.y = 60 - cos(15)*10;
+        rFlipper.backRight.x = 230 - sin((0+angleR)*(PI/180.0))*10;
+        rFlipper.backRight.y = 50 + cos((0+angleR)*(PI/180.0))*10;
 
-        rFlipper.frontRight.x = 120 + sin(15)*(sqrt(10*10 + 80*80));
-        rFlipper.frontRight.y = 60 + cos(15)*(sqrt(10*10 + 80*80));
-        //rFlipper.frontRight.x = 120;
-        //rFlipper.frontRight.y = 60;
+        rFlipper.frontRight.x = 230 - sin((82.875+angleR)*(PI/180))*80.6226;
+        rFlipper.frontRight.y = 50 + cos((82.875+angleR)*(PI/180))*80.6226;
 
-        rFlipper.frontTop.x = 125;
-        rFlipper.frontTop.y = 55;
+        rFlipper.frontTop.x = 230 - sin((86.63+angleR)*(PI/180))*85.1469;
+        rFlipper.frontTop.y = 50 + cos((86.63+angleR)*(PI/180))*85.1469;
 
-        rFlipper.frontLeft.x = 120;
-        rFlipper.frontLeft.y = 50;
+        rFlipper.frontLeft.x = 230 - sin((90+angleR)*(PI/180.0))*80;
+        rFlipper.frontLeft.y = 50 + cos((90+angleR)*(PI/180.0))*80;
 
     //left flipper positions
-        lFlipper.backLeft.x = 200;
-        lFlipper.backLeft.y = 200;
+        lFlipper.backLeft.x = 40;
+        lFlipper.backLeft.y = 50;
 
-        lFlipper.backRight.x = 210;
-        lFlipper.backRight.y = 200;
+        lFlipper.backRight.x = 40 + sin((0+angleL)*(PI/180.0))*10;
+        lFlipper.backRight.y = 50 + cos((0+angleL)*(PI/180.0))*10;
 
-        lFlipper.frontRight.x = 210;
-        lFlipper.frontRight.y = 260;
+        lFlipper.frontRight.x = 40 + sin((82.875+angleL)*(PI/180))*80.6226;
+        lFlipper.frontRight.y = 50 + cos((82.875+angleL)*(PI/180))*80.6226;
 
-        lFlipper.frontTop.x = 205;
-        lFlipper.frontTop.y = 270;
+        lFlipper.frontTop.x = 40 + sin((86.63+angleL)*(PI/180))*85.1469;
+        lFlipper.frontTop.y = 50 + cos((86.63+angleL)*(PI/180))*85.1469;
 
-        lFlipper.frontLeft.x = 200;
-        lFlipper.frontLeft.y = 260;
+        lFlipper.frontLeft.x = 40 + sin((90+angleL)*(PI/180.0))*80;
+        lFlipper.frontLeft.y = 50 + cos((90+angleL)*(PI/180.0))*80;
 }
 
 // initializes openGL, glut, and glui
@@ -697,15 +696,16 @@ void activateRightFlipper(){
 
 void myTimer(int v){
     if(activateRFlipper == 1){
+        flipperPositions();
         lockR = 1;
         clockR++;
 
-        if(clockR < 100){
-            angleR = 1;
-        } else if(clockR < 200){
-            angleR = -1;
-        } else if(clockR >= 200){
-            angleR = 0;
+        if(clockR < 30){
+            angleR -= 1.0;
+        } else if(clockR < 60){
+            angleR += 1.0;
+        } else if(clockR >= 60){
+            angleR = 25;
             clockR = 0;
             lockR = 0;
             activateRFlipper = 0;
@@ -713,18 +713,19 @@ void myTimer(int v){
         glutPostRedisplay();
     }
     if(activateLFlipper == 1){
+        flipperPositions();
         lockL = 1;
         clockL++;
 
-        if(clockL < 100){
-            angleL = 1;
-        } else if(clockL < 200){
-            angleL = -1;
-        } else if(clockL >= 200){
-            angleL = 0;
-            clockR = 0;
-            lockR = 0;
-            activateRFlipper = 0;
+        if(clockL < 30){
+            angleL -= 1.0;
+        } else if(clockL < 60){
+            angleL += 1.0;
+        } else if(clockL >= 60){
+            angleL = 25;
+            clockL = 0;
+            lockL = 0;
+            activateLFlipper = 0;
         }
         glutPostRedisplay();
     }
@@ -770,6 +771,8 @@ int main(int argc, char *argv[])
 	glutMouseFunc( mousePress );
 	glutMotionFunc(mouseDrag);
 	glutPassiveMotionFunc( mouseMovement );
+	glutTimerFunc(5, myTimer, 1);
+	glutKeyboardFunc(myKeyboard);
 
 	init();
 	glutMainLoop();
