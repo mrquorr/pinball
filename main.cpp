@@ -70,7 +70,7 @@ Flipper rFlipper;
 Flipper lFlipper;
 
 // physics variables
-float g = .00002;
+float g = .0002;
 float f = .00001;
 float initVelX = 0;
 float currVelX = 0;
