@@ -14,6 +14,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="include" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -24,6 +25,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -42,6 +44,7 @@
 			<Add library="gdi32" />
 			<Add directory="C:/GLUT/lib" />
 		</Linker>
+		<Unit filename="include/methods.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

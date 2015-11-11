@@ -62,7 +62,7 @@ struct Material {
 Color red, grey, dRed, gold, black, blue, green, white;
 
 // Materials
-Material bumperMaterial, pinballMaterial, holeMaterial, wallMaterial;
+Material bumperMaterial, pinballMaterial;
 
 // Points
 Point origin, leftFlipper, rightFlipper, upperWall, leftWall,holeWallLeft;
@@ -79,7 +79,7 @@ Flipper rFlipper;
 Flipper lFlipper;
 
 // physics variables
-float g = .0002;
+float g = .00002;
 float f = .00001;
 float initVelX = 0;
 float currVelX = 0;
@@ -171,33 +171,6 @@ void initializeMaterials() {
     pinballMaterial.specular[3] = 1.0f;
     pinballMaterial.shininess[0] = 51.2f;
 
-    holeMaterial.ambient[0] = 0.02f;
-    holeMaterial.ambient[1] = 0.02f;
-    holeMaterial.ambient[2] = 0.02f;
-    holeMaterial.ambient[3] = 1.0f;
-    holeMaterial.diffuse[0] = 0.01f;
-    holeMaterial.diffuse[1] = 0.01f;
-    holeMaterial.diffuse[2] = 0.01f;
-    holeMaterial.diffuse[3] = 1.0;
-    holeMaterial.specular[0] = 0.4f;
-    holeMaterial.specular[1] = 0.4f;
-    holeMaterial.specular[2] = 0.4f;
-    holeMaterial.specular[3] = 1.0f;
-    holeMaterial.shininess[0] = 10.0f;
-
-    wallMaterial.ambient[0] = 0.1745f;
-    wallMaterial.ambient[1] = 0.01175f;
-    wallMaterial.ambient[2] = 0.01175f;
-    wallMaterial.ambient[3] = 1.0f;
-    wallMaterial.diffuse[0] = 0.61424f;
-    wallMaterial.diffuse[1] = 0.04136f;
-    wallMaterial.diffuse[2] = 0.04136f;
-    wallMaterial.diffuse[3] = 1.0;
-    wallMaterial.specular[0] = 0.727811f;
-    wallMaterial.specular[1] = 0.626959f;
-    wallMaterial.specular[2] = 0.626959f;
-    wallMaterial.specular[3] = 1.0f;
-    wallMaterial.shininess[0] = 76.8f;
 
 };
 void changeMaterial(Material& material ) {
@@ -247,9 +220,18 @@ void drawBumper(Point& p, float radius, Color& c ) {
     changeMaterial(bumperMaterial);
     glScaled(1,1,1.0);
     glTranslated(p.x, p.y, 0);
-    glutSolidSphere(radius,40,40);
+    glutSolidSphere(radius,15,15);
+
 	glPopMatrix();
 
+	/*
+	float delta_theta = 0.03;
+	glColor3f(c.r, c.g, c.b);
+	glBegin( GL_POLYGON );
+	for( float angle = 0; angle < 2*PI; angle += delta_theta )
+		glVertex3f( radius*cos(angle)+p.x, radius*sin(angle)+p.y, 0 );
+	glEnd();
+	*/
 }
 
 
@@ -415,13 +397,12 @@ void checkColission(Point &p, int type){
 */
 void drawHole(Point& p, float radius, Color& c ) {
 
-	glPushMatrix();
-    changeMaterial(holeMaterial);
-    glScaled(1,1,1.0);
-    glTranslated(p.x, p.y, 0);
-    glutSolidSphere(radius,15,15);
-	glPopMatrix();
-	lastPosition = p;
+	float delta_theta = 0.03;
+	glColor3f(c.r, c.g, c.b);
+	glBegin( GL_POLYGON );
+	for( float angle = 0; angle < 2*PI; angle += delta_theta )
+		glVertex3f( radius*cos(angle)+p.x, radius*sin(angle)+p.y, 0 );
+	glEnd();
 }
 
 /**
@@ -443,7 +424,24 @@ void drawTarget(Point& p, float height, float width, Color& c ) {
 	glEnd();
 }
 
+/**
+    Method used to draw every triangle of the game
 
+    @param p Point in which the rectangle should be
+    @param height of the rectangle
+    @param width of the rectangle
+    @param c Color structure in the form of r,g,b
+*/
+void drawRectangle(Point& p, float height, float width, Color& c ) {
+
+	glColor3f(c.r, c.g, c.b);
+	glBegin( GL_POLYGON );
+	glVertex3f( p.x, p.y, 0 );
+	glVertex3f( p.x+width, p.y, 0 );
+	glVertex3f( p.x+width, p.y+height, 0 );
+	glVertex3f( p.x, p.y+height, 0 );
+	glEnd();
+}
 
 /**
     Function used to draw any wall given point and sizes
@@ -456,14 +454,14 @@ void drawTarget(Point& p, float height, float width, Color& c ) {
 void drawWall(Point& p, float height, float width, Color& c ) {
 
 	// draw rectangle
-    glPushMatrix();
-    glColor3f(c.r, c.g, c.b);
-    changeMaterial(wallMaterial);
-    glTranslated(p.x, p.y, 0);
-    glScaled(width,height,1);
-    glutSolidCube(2);
-	glPopMatrix();
-
+	glColor3f(c.r, c.g, c.b);
+	glBegin( GL_POLYGON );
+	glVertex3f( p.x, p.y, 0 );
+	glVertex3f( p.x+width, p.y, 0 );
+	glVertex3f( p.x+width, p.y+height, 0 );
+	glVertex3f( p.x, p.y+height, 0 );
+	glVertex3f( p.x, p.y, 0 );
+	glEnd();
 }
 
 /**
@@ -488,6 +486,9 @@ void drawFlipper( Color& c, Flipper& f ) {
 
 }
 
+
+
+
 /**
     Function used as Display. Called every time there
     is a change that needs to be displayed
@@ -498,7 +499,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-	//drawRectangle(origin, 450, 300, dRed);
+	drawRectangle(origin, 450, 300, dRed);
 
 
 	//draw flippers
@@ -508,23 +509,25 @@ void display(void)
 	// obstacles
 
 	drawBumper(bumper1,15,gold); // bumper1
-	drawBumper(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+	drawBumper(bumper2,15,gold); // bumper2
+
+
+
+
+
 
 	drawTarget(target1, 5, 20, green); // target1
 	drawTarget(target2, 5, 20, green); // target2
 	drawHole(hole1,10,black); // hole1
 	drawHole(hole2,10,black); // hole2
 	drawCircle(currentPosition,circleRadius,grey); // the pinball
-
-
-	drawWall(upperWall,10,600,red); // top wall
+	drawWall(upperWall,10,300,red); // top wall
 	drawWall(leftWall,440,10,red); // left playspace wall
 	drawWall(holeWallLeft,110,10,red); // left hole wall
 	drawWall(holeWallRight,110,10,red); // right hole wall
 	drawWall(rightWall,400,10,red); // right playspace wall
-	drawWall(farRightWall,440,5,red); // right playspace wall
-	drawWall(insertWall,10,20,red); // wall under ball in starting position
-
+	drawWall(farRightWall,440,290,red); // far right wall
+	drawRectangle(insertWall,10,50,red); // wall under ball in starting position
 
     checkColission(bumper1, 1);
 	checkColission(bumper2, 1);
@@ -561,16 +564,12 @@ void display(void)
 		}
 	glEnd();
 	// angled wall for insertion
-
-
-    glColor3f(red.r, red.g, red.b);
-    changeMaterial(wallMaterial);
-	glBegin(GL_TRIANGLES);
-
-        glVertex3f(270, 440, 1.0);
-        glVertex3f(290, 440, 1.0);
-        glVertex3f(290, 420, 1.0);
-    glEnd();
+	glBegin(GL_POLYGON);
+		glColor3f(red.r, red.g, red.b);
+		glVertex2f(270,440);
+		glVertex2f(290,440);
+		glVertex2f(290,420);
+	glEnd();
 
 	stringstream ss;
 	ss << "Score: " << score;
@@ -659,16 +658,16 @@ void init(void)
 	holeWallLeft.x = 40; holeWallLeft.y = 0;
 	holeWallRight.x = 222; holeWallRight.y = 0;
 	rightWall.x = 260;	rightWall.y = 0;
-	farRightWall.x = 295; farRightWall.y = 0;
-	insertWall.x = 270; insertWall.y = 60;
+	farRightWall.x = 290; farRightWall.y = 0;
+	insertWall.x = 260; insertWall.y = 60;
 
 	// obstacles
 	bumper1.x = 65; bumper1.y = 270;
 	bumper2.x = 210; bumper2.y = 270;
 	target1.x = 110; target1.y = 435;
 	target2.x = 145; target2.y = 435;
-	hole1.x = 20; hole1.y = 10;
-	hole2.x = 240; hole2.y = 10;
+	hole1.x = 25; hole1.y = 10;
+	hole2.x = 245; hole2.y = 10;
 
 
     initializeMaterials();
@@ -683,22 +682,20 @@ void init(void)
 
 
     // asigna la apropiada fuente de luz
-   GLfloat lightIntensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
-    //GLfloat light_position[] = {1.0f, 1.0f, 3.0f, 0.0f};
-    GLfloat light_position[] = {1.0f, 1.0f, 3.0f, 0.0f};
+    GLfloat lightIntensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    GLfloat light_position[] = {0.0f, 0.0f, 3.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_POSITION,light_position);
     glLightfv(GL_LIGHT0, GL_DIFFUSE,lightIntensity);
 
-    glClearColor (0.5, 0.5, 0.5, 1.0);
-
-
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 0.0, 0.0);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, screenWidth, 0, screenHeight, 0, 1);
 	initialPosition.x = 280;	initialPosition.y = 77;
 	currentPosition = initialPosition;
-
 	flipperPositions();
 }
 
@@ -868,7 +865,7 @@ void reshape(int ancho, int alto) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(0,0,100,0, 0, 0, 0, 1, 100);
+    gluLookAt(2, 0, 100, 0, 0, 0, 0, 5, 100);
 
 
 }
