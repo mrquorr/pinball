@@ -81,10 +81,10 @@ void display(void)
         drawWall(insertWall,10,20,red); // wall under ball in starting position
 
 
-        checkColission(bumper1, 1);
-        checkColission(bumper2, 1);
-        checkColission(bumper3, 1);
-        checkColission(bumper4, 1);
+       //checkColission(bumper1, 1);
+        //checkColission(bumper2, 1);
+        //checkColission(bumper3, 1);
+        //checkColission(bumper4, 1);
         checkColission(target1, 2);
         checkColission(target2, 2);
         checkColission(upperWall,3);
@@ -263,12 +263,14 @@ void init(void)
     GLuint i=0;
     glGenTextures(1, texName); //Make room for our texture
     Image* image;
-    //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
-    image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
+    image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\left.bmp");
+    //image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
     loadTexture(image,i++);
 
 
     delete image;
+
+    PlaySound(TEXT("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
