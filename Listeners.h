@@ -83,6 +83,7 @@ void activateFlipper(int type){
     Function to start a game
 */
 void start(){
+    gameOver = false;
     if(gameState == 0){
         gameState = 1;
         score = 0;
@@ -107,6 +108,9 @@ void finish(){
     } else if(gameState == 1 || gameState == 2){
         gameState = 3;
         ballCounter = 0;
+        score = 0;
+        isMoving = false;
+        currentPosition = initialPosition;
         gameOver = true;
     } else if(gameState == 3){
         cout << "Error, action not allowed" << endl;

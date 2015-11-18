@@ -37,17 +37,19 @@ void checkColission(Point &p, int type, int typeBumper){
                 if (typeBumper == 1) {
                     careerCounter ++;
 
-                    if (careerCounter%2==0) {
+                    if (careerCounter==2) {
                         careerLevel++;
                         score+= 5000;
+                        careerCounter =0;
                     }
                 }
                 else if ( typeBumper == 2 ) {
                     familyCounter++;
 
-                    if (familyCounter%2==0) {
+                    if (familyCounter==2){
                         familyLevel++;
                         score+= 5000;
+                        careerCounter = 0;
                     }
                 }
                 score += 500;
@@ -119,6 +121,9 @@ void checkColission(Point &p, int type, int typeBumper){
              if (d <= 22 && ballCounter > 0) {
                 // do this when there is a collision and there are no more balls left
                 ballCounter--;
+                if(ballCounter == 0){
+                    finish();
+                }
                 cout << "Ball Counter: " << ballCounter << endl;
                 currentPosition.x = 280;
                 currentPosition.y = 77;

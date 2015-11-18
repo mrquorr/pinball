@@ -64,7 +64,7 @@ void display(void)
         drawBumperGreen(bumper1,15,gold); // bumper1
         drawBumperGreen(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
         drawBumperRed(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-        drawBumperRed(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        //drawBumperRed(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
 
         drawTarget(target1, 5, 20, green); // target1
         drawTarget(target2, 5, 20, green); // target2
@@ -85,7 +85,7 @@ void display(void)
         checkColission(bumper1, 1,1);
         checkColission(bumper2, 1,1);
         checkColission(bumper3, 1,2);
-        checkColission(bumper4, 1,2);
+        //checkColission(bumper4, 1,2);
         checkColission(target1, 2, 0);
         checkColission(target2, 2, 0 );
         checkColission(upperWall,3, 0);
@@ -109,7 +109,7 @@ void display(void)
             if(dragging)
             {
                 launch = 0;
-                acc += 5;
+                acc += 2;
                 glVertex2f(290, screenHeight - mouseY);
                 glVertex2f(270, screenHeight - mouseY);
             }
@@ -266,14 +266,8 @@ void init(void)
     Image* image;
     //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
     image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
+    PlaySound(TEXT("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
     loadTexture(image,i++);
-
-
-    //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\heart.bmp");
-    image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
-    loadTexture(image,i++);
-
-
 
     delete image;
 
@@ -290,10 +284,6 @@ void init(void)
 
 void reshape(int ancho, int alto) {
     glViewport(0,0,ancho, alto);
-
-    //double winHt = 1.0;//altura mitad de la ventana. Probar con valores 0.5, 0.25, 0.125
-    //glOrtho(-winHt*64/48.0, winHt*64/48.0, -winHt, winHt, 0.1,100.0);
-
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -314,7 +304,7 @@ void reshape(int ancho, int alto) {
 */
 void gravity(int v){
     if(isMoving){
-        currVelY -= 0.07;
+        currVelY -= 0.1;
     } else {
         currVelY = 0.0;
     }
