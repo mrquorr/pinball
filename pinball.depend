@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1447008951 source:c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\main.cpp
+1447834135 source:c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\main.cpp
 	<windows.h>
 	<GLUT/glut.h>
 	<GL/glut.h>
@@ -7,6 +7,14 @@
 	<sstream>
 	<math.h>
 	<iostream>
+	<assert.h>
+	<fstream>
+	<time.h>
+	"Structs.h"
+	"Menu.h"
+	"Draws.h"
+	"Listeners.h"
+	"Collision.h"
 
 976688572 c:\glut\include\gl\glut.h
 	<windows.h>
@@ -21,4 +29,45 @@
 	<sstream>
 	<math.h>
 	<iostream>
+
+1447809012 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\imageloader.h
+
+1447832631 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\structs.h
+	<string.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<iostream>
+
+1447832631 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\menu.h
+	<string.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<iostream>
+
+1447832631 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\draws.h
+	<string.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<iostream>
+	<assert.h>
+	<fstream>
+	"imageloader.h"
+
+1447832631 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\listeners.h
+	<string.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<iostream>
+
+1447835177 c:\users\fabiola\dropbox\tec\septimo_semestre\graficos computacionales\proyecto pinball\pinball\collision.h
+	<windows.h>
+	<GLUT/glut.h>
+	<GL/glut.h>
+	<stdlib.h>
+	<sstream>
+	<math.h>
+	<iostream>
+	<assert.h>
+	<fstream>
+	<time.h>
 
