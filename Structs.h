@@ -97,8 +97,9 @@ int score = 0;
 int gameState = 0;
 bool isPaused = false;
 bool gameOver = false;
-int familyLevel = 4;
-int careerLevel = 2;
+int familyLevel = 0;
+int careerLevel = 0;
+int r = 0;
 
 //flipper values
 int activateRFlipper=0;
