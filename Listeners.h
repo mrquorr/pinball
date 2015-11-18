@@ -88,13 +88,15 @@ void start(){
     if(gameState == 0){
         gameState = 1;
         score = 0;
-        ballCounter = 5;
+        ballCounter = 3;
     } else if(gameState == 1 || gameState == 2){
         cout << "Error, action not allowed" << endl;
     } else if(gameState == 3){
         gameState = 1;
         score = 0;
-        ballCounter = 5;
+        ballCounter = 3;
+    } else if(gameState == 4){
+        cout << "Error, action not allowed" << endl;
     }
 }
 
@@ -111,6 +113,8 @@ void finish(){
         ballCounter = 0;
         gameOver = true;
     } else if(gameState == 3){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 4){
         cout << "Error, action not allowed" << endl;
     }
 }
@@ -132,6 +136,29 @@ void pause(){
         gameState = 1;
     } else if(gameState == 3){
         cout << "Error, action not allowed" << endl;
+    } else if(gameState == 4){
+
+    }
+}
+
+/**
+    Function to show info screen
+*/
+void info(int previousState){
+    srand (time(NULL));
+    r = rand() % 20;
+    if(gameState == 0){
+        gameState = 4;
+        prevGameState = previousState;
+    } else if(gameState == 1){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 2){
+        gameState = 4;
+        prevGameState = previousState;
+    } else if(gameState == 3){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 4){
+        gameState = prevGameState;
     }
 }
 
@@ -171,6 +198,10 @@ void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
     case 'I':
     case 'i':
         start();
+        break;
+    case 'O':
+    case 'o':
+        info(gameState);
         break;
     case 'e':
     case 'E':

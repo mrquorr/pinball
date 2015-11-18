@@ -35,7 +35,7 @@ void checkColission(Point &p, int type){
                 // do this when there is a collision
                 score += 500;
                 vx = -vx;
-
+                vy = 0.5;
                 vy = -vy ;
             }
         }
@@ -44,7 +44,7 @@ void checkColission(Point &p, int type){
             if(p.y < currentPosition.y + 7 && (currentPosition.x > p.x && currentPosition.x < p.x + 20))
             {
                 score += 1000;
-
+                vy = 0.5;
                 vy = -vy;
             }
         }
@@ -57,20 +57,10 @@ void checkColission(Point &p, int type){
         }
         break;
         case 4: { //side walls
-
             if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
             {
-                if (p.x + 10 < currentPosition.x - 7 && p.x > currentPosition.x + 7 && currentPosition.y <= 110 ) {
-                    cout << "Choco por arriba" << endl;
-                    vy = -vy;
-                }
-                else
-                {
-                    cout << p.x + 10 << " y " << currentPosition.x - 7 <<  " y " << currentPosition.y << endl;
-                    // do this when there is collision with side of wall
-                    vx = -vx;
-                }
-
+                // do this when there is collision with side of wall
+                vx = -vx;
             }
         }
         break;
@@ -91,7 +81,7 @@ void checkColission(Point &p, int type){
             else if(p.y + 440 < currentPosition.y - 7 || p.y > currentPosition.y + 7)
             {
                 // do this when there is collision with top of wall
-
+                vy = 0.5;
                 vy = -vy;
             }
         }

@@ -95,6 +95,7 @@ int mouseY = 0;
 int ballCounter = 5;
 int score = 0;
 int gameState = 0;
+int prevGameState;
 bool isPaused = false;
 bool gameOver = false;
 int familyLevel = 0;

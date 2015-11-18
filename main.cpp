@@ -40,7 +40,6 @@ using namespace std;
 */
 void display(void)
 {
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	if(gameState == 0){
@@ -49,7 +48,9 @@ void display(void)
         drawPause(25, 400, black, red, blue);
     } else if(gameState == 3){
         drawGameover(25, 400, white, red, black);
-    }else if(gameState == 1){
+    } else if(gameState == 4){
+        drawInformation(25, 400, white, blue, green);
+    } else if(gameState == 1){
 
         //drawRectangle(origin, 450, 300, dRed);
       glPushMatrix();
@@ -81,10 +82,10 @@ void display(void)
         drawWall(insertWall,10,20,red); // wall under ball in starting position
 
 
-       //checkColission(bumper1, 1);
-        //checkColission(bumper2, 1);
-        //checkColission(bumper3, 1);
-        //checkColission(bumper4, 1);
+        checkColission(bumper1, 1);
+        checkColission(bumper2, 1);
+        checkColission(bumper3, 1);
+        checkColission(bumper4, 1);
         checkColission(target1, 2);
         checkColission(target2, 2);
         checkColission(upperWall,3);
@@ -263,14 +264,12 @@ void init(void)
     GLuint i=0;
     glGenTextures(1, texName); //Make room for our texture
     Image* image;
-    image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\left.bmp");
-    //image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
+    //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
+    image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
     loadTexture(image,i++);
 
 
     delete image;
-
-    PlaySound(TEXT("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
