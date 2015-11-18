@@ -18,7 +18,7 @@ string tipsArray[20] = {"Sin globito no hay fiesta", "Cuidado, el SIDA si da", "
                         "Lavados vaginales, mejor compra paniales", "Marcha atras, esperen ser papas", "Durante de la menstruacion, lo dejaste en manos del senior",
                         "Pildora del dia, acaba en camilla", "Huele a pescado, dejalo vetado", "Granos y una verruga, mejor pega a la fuga", "Pus amarilla, huye a la esquina",
                         "Globo usado, globo tronado", "Planea tu familia, seras feliz en tus dias", "Checate seguido, no caigas en el descuido"};
-
+//int r = rand() % 20;
 
 
 /**
@@ -54,8 +54,6 @@ void drawMenu(float x, float y, Color& background, Color& title, Color& words){
     float width = 250;
     float height = 300;
     float wordJump = 30;
-    srand (time(NULL));
-    int r = rand() % 20;
     glDisable(GL_LIGHTING);
 
     glColor3f(background.r, background.g, background.b);
@@ -74,8 +72,15 @@ void drawMenu(float x, float y, Color& background, Color& title, Color& words){
     output(x, y-(2*wordJump), 0.1, "Terminar - T", 0.15);
     output(x, y-(3*wordJump), 0.1, "Pausa - P", 0.15);
     output(x, y-(4*wordJump), 0.1, "Iniciar - I", 0.15);
+
     //string tip = tipsArray[5];
-    output(x, y-(5*wordJump), 0.1, "La del dia no, envez la pildora del mes", 0.08);
+    char tip[1024];
+    strncpy(tip, tipsArray[r].c_str(), sizeof(tip));
+    tip[sizeof(tip) - 1] = 0;
+    output(x, y-(5*wordJump), 0.1, tip, 0.08);
+
+    output(x, y-(7*wordJump), 0.1, "Sergio Cordero A01191167", 0.08);
+    output(x, y-(8*wordJump), 0.1, "Emilio Flores A0", 0.08);
 
     glEnable(GL_LIGHTING);
 }
@@ -93,8 +98,8 @@ void drawPause(float x, float y, Color& background, Color& title, Color& words){
     float width = 250;
     float height = 300;
     float wordJump = 30;
-    srand (time(NULL));
-    int r = rand() % 20;
+    //srand (time(NULL));
+    //int r = rand() % 20;
     glDisable(GL_LIGHTING);
 
     glColor3f(background.r, background.g, background.b);
@@ -114,7 +119,10 @@ void drawPause(float x, float y, Color& background, Color& title, Color& words){
     output(x, y-(3*wordJump), 0.1, "Pausa - P", 0.15);
     output(x, y-(4*wordJump), 0.1, "Iniciar - I", 0.15);
 
-    output(x, y-(5*wordJump), 0.1, "Marcha atras, esperen ser papas", 0.08);
+    char tip[1024];
+    strncpy(tip, tipsArray[r].c_str(), sizeof(tip));
+    tip[sizeof(tip) - 1] = 0;
+    output(x, y-(5*wordJump), 0.1, tip, 0.08);
 
     glEnable(GL_LIGHTING);
 }
@@ -132,8 +140,6 @@ void drawGameover(float x, float y, Color& background, Color& title, Color& word
     float width = 250;
     float height = 300;
     float wordJump = 30;
-    srand (time(NULL));
-    int r = rand() % 20;
     glDisable(GL_LIGHTING);
 
     glColor3f(background.r, background.g, background.b);
@@ -178,10 +184,20 @@ void drawGameover(float x, float y, Color& background, Color& title, Color& word
         output(x, y-(3*wordJump), 0.1, "Eres duenia de una superempresa y mujer del anio.", 0.067);
     }
 
-    output(x, y-(4*wordJump), 0.1, "Puntaje: 40", 0.15);
+    ostringstream convert;
+    convert << score;
+    string totalScore = "Puntaje: " + convert.str();
+    char tab2[1024];
+    strncpy(tab2, totalScore.c_str(), sizeof(tab2));
+    tab2[sizeof(tab2) - 1] = 0;
+
+    output(x, y-(4*wordJump), 0.1, tab2, 0.15);
     output(x, y-(5*wordJump), 0.1, "Iniciar un nuevo juego - I", 0.1);
 
-    output(x, y-(6*wordJump), 0.1, "Hablar sobre sexo, mejor en exceso", 0.08);
+    char tip[1024];
+    strncpy(tip, tipsArray[r].c_str(), sizeof(tip));
+    tip[sizeof(tip) - 1] = 0;
+    output(x, y-(6*wordJump), 0.1, tip, 0.08);
 
     glEnable(GL_LIGHTING);
 }

@@ -104,6 +104,9 @@ void checkColission(Point &p, int type){
             if((p.y < 1 || p.x > 300 || p.y > 440) && ballCounter > 0)
             {
                 ballCounter--;
+                if(ballCounter == 0){
+                    finish();
+                }
                 p.x = 280;
                 p.y = 77;
                 vx = -vx;
