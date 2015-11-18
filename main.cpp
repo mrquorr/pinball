@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <fstream>
 #include "imageloader.h"
+#include <time.h>       /* time */
 
 using namespace std;
 
@@ -259,7 +260,7 @@ Material bumperMaterial, pinballMaterial, holeMaterial, wallMaterial;
 
 // Points
 Point origin, leftFlipper, rightFlipper, upperWall, leftWall,holeWallLeft;
-Point rightWall, farRightWall, holeWallRight, insertWall, bumper1, bumper2, target1, target2, hole1, hole2;
+Point rightWall, farRightWall, holeWallRight, insertWall, bumper1, bumper2, bumper3, bumper4, target1, target2, hole1, hole2;
 Point leftLFlipperState, leftRFlipperState, rightLFlipperState, rightRFlipperState;
 Point currentPosition, initialPosition, lastPosition;
 
@@ -272,7 +273,7 @@ Flipper rFlipper;
 Flipper lFlipper;
 
 // Textures
-//static GLuint texName[36];
+static GLuint texName[2];
 
 // physics variables
 float g = .0002;
@@ -420,7 +421,7 @@ void drawCircle(Point& p, float radius, Color& c ) {
     glPushMatrix();
 
     changeMaterial(pinballMaterial);
-    glScaled(1,1,0.1);
+    glScaled(1,1,0.02);
     glTranslated(p.x, p.y, 0);
     glutSolidSphere(radius,15,15);
 	glPopMatrix();
@@ -440,9 +441,8 @@ void drawBumper(Point& p, float radius, Color& c ) {
 	// draw circle
 
     glPushMatrix();
-
     changeMaterial(bumperMaterial);
-    glScaled(1,0.5,0.1);
+    glScaled(1,1.0,0.02);
     glTranslated(p.x, p.y, 0);
     glutSolidSphere(radius,40,40);
 	glPopMatrix();
@@ -457,7 +457,8 @@ void drawBumper(Point& p, float radius, Color& c ) {
     @param type switch the different type of collitions,
     1 = bumper (500), 2 = target (1000 score) 3 = top wall
     4 = side walls ,  5 = upper side wall, 6 = outher wall
-    7 = draw hole,   8 = circle collision
+    7 = draw hole,   8 = circle collision, 9 = flipper left
+    10 = flipper right
 
 */
 void checkColission(Point &p, int type){
@@ -467,12 +468,18 @@ void checkColission(Point &p, int type){
              // Distance to bumper
             float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
 
+
             if(d <= 22)
             {
+
+
+
                 // do this when there is a collision
                 score += 500;
                 vx = -vx;
-                vy = -vy;
+                vy = 0.5;
+                vy = -vy ;
+
             }
         }
         break;
@@ -480,6 +487,7 @@ void checkColission(Point &p, int type){
             if(p.y < currentPosition.y + 7 && (currentPosition.x > p.x && currentPosition.x < p.x + 20))
             {
                 score += 1000;
+                vy = 0.5;
                 vy = -vy;
             }
         }
@@ -487,7 +495,9 @@ void checkColission(Point &p, int type){
         case 3: { //top wall
             if(p.y < currentPosition.y + 7)
             {
+
                 vy = -vy;
+
             }
         }
         break;
@@ -516,6 +526,7 @@ void checkColission(Point &p, int type){
             else if(p.y + 440 < currentPosition.y - 7 || p.y > currentPosition.y + 7)
             {
                 // do this when there is collision with top of wall
+                vy = 0.5;
                 vy = -vy;
             }
         }
@@ -580,7 +591,27 @@ void checkColission(Point &p, int type){
             }
         }
         break;
+        case 9: // flipper left
 
+
+           if(50  > currentPosition.y - 7 && ( currentPosition.x > 50 && currentPosition.x < 115 ))
+            {
+                cout << "Colision con flipper left " << endl;
+                // do this when there is collision with top of wall
+                vy = -vy;
+            }
+        break;
+        case 10: // flipper right
+
+
+
+           if(50 > currentPosition.y - 7 && ( currentPosition.x > 155 && currentPosition.x < 215 ))
+            {
+                cout << "Colision con flipper right " << endl;
+                // do this when there is collision with top of wall
+                vy = -vy;
+            }
+        break;
 
 
     }
@@ -598,7 +629,7 @@ void drawHole(Point& p, float radius, Color& c ) {
 
 	glPushMatrix();
     changeMaterial(holeMaterial);
-    glScaled(1,1,0.1);
+    glScaled(1,1,0.02);
     glTranslated(p.x, p.y, 0);
     glutSolidSphere(radius,15,15);
 	glPopMatrix();
@@ -641,7 +672,7 @@ void drawWall(Point& p, float height, float width, Color& c ) {
     glColor3f(c.r, c.g, c.b);
     changeMaterial(wallMaterial);
     glTranslated(p.x, p.y, 0);
-    glScaled(width,height,0.1);
+    glScaled(width,height,0.05);
     glutSolidCube(2);
 	glPopMatrix();
 
@@ -659,25 +690,43 @@ void drawFlipper( Color& c, Flipper& f ) {
     glColor3f(c.r, c.g, c.b);
 
     //glBindTexture(GL_TEXTURE_2D, texName[0]);
+
+/*
+    glPushMatrix();
+    glColor3f(c.r, c.g, c.b);
+    changeMaterial(wallMaterial);
+    glTranslated(50, 50, 0);
+    glScaled(5,4,0.05);
+    glutSolidCube(2);
+	glPopMatrix();
+	*/
+
+	 glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texName[0]);
+    glDisable(GL_LIGHTING);
+
 	glBegin(GL_POLYGON);
         //define vertices as the flipper's position
-        //glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(f.backLeft.x, f.backLeft.y);
-        //glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(f.backRight.x, f.backRight.y);
-        //glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(f.frontRight.x, f.frontRight.y);
-        glVertex2f(f.frontTop.x, f.frontTop.y);
-        //glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(f.frontLeft.x, f.frontLeft.y);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(f.backLeft.x, f.backLeft.y+20, .0);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3f(f.backRight.x, f.backRight.y-20, .0 );
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3f(f.frontRight.x, f.frontRight.y-20,.0);
+
+        glVertex3f(f.frontTop.x, f.frontTop.y, .0);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3f(f.frontLeft.x, f.frontLeft.y+20, .0);
     glEnd();
+    glEnable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
 
 }
 
 /**
     Makes the image into a texture, and returns the id of the texture
 */
-/*
+
 void loadTexture(Image* image, int k)
 {
 
@@ -703,7 +752,7 @@ void loadTexture(Image* image, int k)
                  image->pixels);               //The actual pixel data
 
 }
-*/
+
 
 /**
     Function that preloads textures
@@ -743,6 +792,8 @@ void display(void)
 
 	drawBumper(bumper1,15,gold); // bumper1
 	drawBumper(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+	drawBumper(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+	drawBumper(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
 
 	drawTarget(target1, 5, 20, green); // target1
 	drawTarget(target2, 5, 20, green); // target2
@@ -762,6 +813,8 @@ void display(void)
 
     checkColission(bumper1, 1);
 	checkColission(bumper2, 1);
+	checkColission(bumper3, 1);
+	checkColission(bumper4, 1);
 	checkColission(target1, 2);
 	checkColission(target2, 2);
     checkColission(upperWall,3);
@@ -773,7 +826,8 @@ void display(void)
     checkColission(hole1, 7);
     checkColission(hole2, 7);
     checkColission(currentPosition, 8);
-
+    checkColission(bumper1, 9);
+    checkColission(bumper1, 10);
 
 	// plunger mechanism
 	glBegin(GL_POLYGON);
@@ -783,7 +837,7 @@ void display(void)
 		if(dragging)
 		{
 			launch = 0;
-			acc += .5;
+			acc += 5;
 			glVertex2f(290, screenHeight - mouseY);
 			glVertex2f(270, screenHeight - mouseY);
 		}
@@ -893,13 +947,15 @@ void init(void)
 	leftWall.x = 0;	leftWall.y = 0;
 	holeWallLeft.x = 40; holeWallLeft.y = 0;
 	holeWallRight.x = 222; holeWallRight.y = 0;
-	rightWall.x = 260;	rightWall.y = 0;
-	farRightWall.x = 295; farRightWall.y = 0;
-	insertWall.x = 270; insertWall.y = 60;
+	rightWall.x = 265;	rightWall.y = 0;
+	farRightWall.x = 305; farRightWall.y = 0;
+	insertWall.x = 280; insertWall.y = 60;
 
 	// obstacles
 	bumper1.x = 65; bumper1.y = 270;
 	bumper2.x = 210; bumper2.y = 270;
+	bumper3.x = 140; bumper3.y = 370;
+	bumper4.x = 140; bumper4.y = 200;
 	target1.x = 110; target1.y = 435;
 	target2.x = 145; target2.y = 435;
 	hole1.x = 20; hole1.y = 10;
@@ -923,15 +979,27 @@ void init(void)
     GLfloat light_position[] = {1.0f, 1.0f, 3.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_POSITION,light_position);
     glLightfv(GL_LIGHT0, GL_DIFFUSE,lightIntensity);
+    GLfloat ambientLight[] = {0.9f, 0.9f, 0.9f, 1.0f};
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
 
     glClearColor (0.5, 0.5, 0.5, 1.0);
 
+    glEnable(GL_TEXTURE_2D);
 
+    GLuint i=0;
+    glGenTextures(1, texName); //Make room for our texture
+    Image* image;
+    image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
+  //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\12a Semana GC\\12a Semana GC\\banderas\\bandera alemania.bmp");
+    loadTexture(image,i++);
+
+
+    delete image;
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, screenWidth, 0, screenHeight, 0, 1);
-	initialPosition.x = 280;	initialPosition.y = 77;
+	initialPosition.x = 285;	initialPosition.y = 77;
 	currentPosition = initialPosition;
 
 	flipperPositions();
@@ -1118,8 +1186,8 @@ void reshape(int ancho, int alto) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    gluLookAt(.01,.01,7, //eye
-              0,0,0,  //center
+    gluLookAt(.0,.0,6.2, //eye
+              .0,.0,0,  //center
               0,1,7);//up
 
 
@@ -1145,3 +1213,223 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 	return 0;
 }
+
+
+#include <assert.h>
+#include <fstream>
+
+#include "imageloader.h"
+
+using namespace std;
+
+Image::Image(char* ps, int w, int h) : pixels(ps), width(w), height(h)
+{
+
+}
+
+Image::~Image()
+{
+    delete[] pixels;
+}
+
+namespace
+{
+//Converts a four-character array to an integer, using little-endian form
+    int toInt(const char* bytes)
+    {
+        return (int)(((unsigned char)bytes[3] << 24) |
+                     ((unsigned char)bytes[2] << 16) |
+                     ((unsigned char)bytes[1] << 8) |
+                     (unsigned char)bytes[0]);
+    }
+
+//Converts a two-character array to a short, using little-endian form
+    short toShort(const char* bytes)
+    {
+        return (short)(((unsigned char)bytes[1] << 8) |
+                       (unsigned char)bytes[0]);
+    }
+
+//Reads the next four bytes as an integer, using little-endian form
+    int readInt(ifstream &input)
+    {
+        char buffer[4];
+        input.read(buffer, 4);
+        return toInt(buffer);
+    }
+
+//Reads the next two bytes as a short, using little-endian form
+    short readShort(ifstream &input)
+    {
+        char buffer[2];
+        input.read(buffer, 2);
+        return toShort(buffer);
+    }
+
+//Just like auto_ptr, but for arrays
+    template<class T>
+    class auto_array
+    {
+    private:
+        T* array;
+        mutable bool isReleased;
+    public:
+        explicit auto_array(T* array_ = NULL) :
+                array(array_), isReleased(false)
+        {
+        }
+
+        auto_array(const auto_array<T> &aarray)
+        {
+            array = aarray.array;
+            isReleased = aarray.isReleased;
+            aarray.isReleased = true;
+        }
+
+        ~auto_array()
+        {
+            if (!isReleased && array != NULL)
+            {
+                delete[] array;
+            }
+        }
+
+        T* get() const
+        {
+            return array;
+        }
+
+        T &operator*() const
+        {
+            return *array;
+        }
+
+        void operator=(const auto_array<T> &aarray)
+        {
+            if (!isReleased && array != NULL)
+            {
+                delete[] array;
+            }
+            array = aarray.array;
+            isReleased = aarray.isReleased;
+            aarray.isReleased = true;
+        }
+
+        T* operator->() const
+        {
+            return array;
+        }
+
+        T* release()
+        {
+            isReleased = true;
+            return array;
+        }
+
+        void reset(T* array_ = NULL)
+        {
+            if (!isReleased && array != NULL)
+            {
+                delete[] array;
+            }
+            array = array_;
+        }
+
+        T* operator+(int i)
+        {
+            return array + i;
+        }
+
+        T &operator[](int i)
+        {
+            return array[i];
+        }
+    };
+}
+
+Image* loadBMP(const char* filename)
+{
+    ifstream input;
+    input.open(filename, ifstream::binary);
+    assert(!input.fail() || !"Could not find file");
+    char buffer[2];
+    input.read(buffer, 2);
+    assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
+    input.ignore(8);
+    int dataOffset = readInt(input);
+
+    //Read the header
+    int headerSize = readInt(input);
+    int width;
+    int height;
+    switch (headerSize)
+    {
+    case 40:
+        //V3
+        width = readInt(input);
+        height = readInt(input);
+        input.ignore(2);
+        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
+        assert(readShort(input) == 0 || !"Image is compressed");
+        break;
+    case 12:
+        //OS/2 V1
+        width = readShort(input);
+        height = readShort(input);
+        input.ignore(2);
+        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
+        break;
+    case 64:
+        //OS/2 V2
+        assert(!"Can't load OS/2 V2 bitmaps");
+        break;
+    case 108:
+        //Windows V4
+        assert(!"Can't load Windows V4 bitmaps");
+        break;
+    case 124:
+        //Windows V5
+        assert(!"Can't load Windows V5 bitmaps");
+        break;
+    default:
+        assert(!"Unknown bitmap format");
+    }
+
+    //Read the data
+    int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
+    int size = bytesPerRow * height;
+    auto_array<char> pixels(new char[size]);
+    input.seekg(dataOffset, ios_base::beg);
+    input.read(pixels.get(), size);
+
+    //Get the data into the right format
+    auto_array<char> pixels2(new char[width * height * 3]);
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int c = 0; c < 3; c++)
+            {
+                pixels2[3 * (width * y + x) + c] =
+                    pixels[bytesPerRow * y + 3 * x + (2 - c)];
+            }
+        }
+    }
+
+    input.close();
+    return new Image(pixels2.release(), width, height);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
