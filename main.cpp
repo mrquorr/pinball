@@ -25,750 +25,14 @@
 #include <iostream>
 #include <assert.h>
 #include <fstream>
-#include "imageloader.h"
-#include <time.h>       /* time */
+#include <time.h>
+#include "Structs.h"
+#include "Menu.h"
+#include "Draws.h"
+#include "Listeners.h"
+#include "Collision.h"
 
 using namespace std;
-
-/**
-    Converting functions
-*/
-/*
-//Converts a four-character array to an integer, using little-endian form
-    int toInt(const char* bytes)
-    {
-        return (int)(((unsigned char)bytes[3] << 24) |
-                     ((unsigned char)bytes[2] << 16) |
-                     ((unsigned char)bytes[1] << 8) |
-                     (unsigned char)bytes[0]);
-    }
-
-//Converts a two-character array to a short, using little-endian form
-    short toShort(const char* bytes)
-    {
-        return (short)(((unsigned char)bytes[1] << 8) |
-                       (unsigned char)bytes[0]);
-    }
-
-//Reads the next four bytes as an integer, using little-endian form
-    int readInt(ifstream &input)
-    {
-        char buffer[4];
-        input.read(buffer, 4);
-        return toInt(buffer);
-    }
-
-//Reads the next two bytes as a short, using little-endian form
-    short readShort(ifstream &input)
-    {
-        char buffer[2];
-        input.read(buffer, 2);
-        return toShort(buffer);
-    }
-
-//Just like auto_ptr, but for arrays
-    template<class T>
-    class auto_array
-    {
-    private:
-        T* array;
-        mutable bool isReleased;
-    public:
-        explicit auto_array(T* array_ = NULL) :
-                array(array_), isReleased(false)
-        {
-        }
-
-        auto_array(const auto_array<T> &aarray)
-        {
-            array = aarray.array;
-            isReleased = aarray.isReleased;
-            aarray.isReleased = true;
-        }
-
-        ~auto_array()
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-        }
-
-        T* get() const
-        {
-            return array;
-        }
-
-        T &operator*() const
-        {
-            return *array;
-        }
-
-        void operator=(const auto_array<T> &aarray)
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-            array = aarray.array;
-            isReleased = aarray.isReleased;
-            aarray.isReleased = true;
-        }
-
-        T* operator->() const
-        {
-            return array;
-        }
-
-        T* release()
-        {
-            isReleased = true;
-            return array;
-        }
-
-        void reset(T* array_ = NULL)
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-            array = array_;
-        }
-
-        T* operator+(int i)
-        {
-            return array + i;
-        }
-
-        T &operator[](int i)
-        {
-            return array[i];
-        }
-    };
-
-/**
-Image* loadBMP(const char* filename)
-{
-    ifstream input;
-    input.open(filename, ifstream::binary);
-    assert(!input.fail() || !"Could not find file");
-    char buffer[2];
-    input.read(buffer, 2);
-    assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
-    input.ignore(8);
-    int dataOffset = readInt(input);
-
-    //Read the header
-    int headerSize = readInt(input);
-    int width;
-    int height;
-    switch (headerSize)
-    {
-    case 40:
-        //V3
-        width = readInt(input);
-        height = readInt(input);
-        input.ignore(2);
-        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-        assert(readShort(input) == 0 || !"Image is compressed");
-        break;
-    case 12:
-        //OS/2 V1
-        width = readShort(input);
-        height = readShort(input);
-        input.ignore(2);
-        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-        break;
-    case 64:
-        //OS/2 V2
-        assert(!"Can't load OS/2 V2 bitmaps");
-        break;
-    case 108:
-        //Windows V4
-        assert(!"Can't load Windows V4 bitmaps");
-        break;
-    case 124:
-        //Windows V5
-        assert(!"Can't load Windows V5 bitmaps");
-        break;
-    default:
-        assert(!"Unknown bitmap format");
-    }
-
-    //Read the data
-    int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
-    int size = bytesPerRow * height;
-    auto_array<char> pixels(new char[size]);
-    input.seekg(dataOffset, ios_base::beg);
-    input.read(pixels.get(), size);
-
-    //Get the data into the right format
-    auto_array<char> pixels2(new char[width * height * 3]);
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int c = 0; c < 3; c++)
-            {
-                pixels2[3 * (width * y + x) + c] =
-                    pixels[bytesPerRow * y + 3 * x + (2 - c)];
-            }
-        }
-    }
-
-    input.close();
-    return new Image(pixels2.release(), width, height);
-}
-*/
-struct Color {
-	float r;
-	float g;
-	float b;
-	float a;
-};
-
-struct Point {
-	float x;
-	float y;
-	float z;
-};
-
-struct Vector {
-	float angle;
-	float speed;
-};
-
-struct Flipper {
-    Point backLeft;
-    Point backRight;
-    Point frontLeft;
-    Point frontRight;
-    Point frontTop;
-};
-
-struct Material {
-    GLfloat ambient[4];
-    GLfloat diffuse[4];
-    GLfloat specular[4];
-    GLfloat shininess[1];
-};
-// Colors
-Color red, grey, dRed, gold, black, blue, green, white;
-
-// Materials
-Material bumperMaterial, pinballMaterial, holeMaterial, wallMaterial;
-
-// Points
-Point origin, leftFlipper, rightFlipper, upperWall, leftWall,holeWallLeft;
-Point rightWall, farRightWall, holeWallRight, insertWall, bumper1, bumper2, bumper3, bumper4, target1, target2, hole1, hole2;
-Point leftLFlipperState, leftRFlipperState, rightLFlipperState, rightRFlipperState;
-Point currentPosition, initialPosition, lastPosition;
-
-// Vectors
-Vector current;
-Vector initial;
-
-// Flippers
-Flipper rFlipper;
-Flipper lFlipper;
-
-// Textures
-static GLuint texName[2];
-
-// physics variables
-float g = .0002;
-float f = .00001;
-float initVelX = 0;
-float currVelX = 0;
-float initVelY = 0;
-float currVelY = 0;
-bool isMoving = false;
-float vx = 0;
-float vy = 0;
-float ld, rd;
-float acc = 0;
-float launch = 0;
-
-
-const float ANGLE_CHANGE = 45;
-const float PI = 3.141592;
-const int BALL_SIZE = 7;
-const int ANIMATION_TIME = 20;
-const int screenHeight = 500;
-const int screenWidth = 300;
-const int circleRadius = 7;
-
-// mouse variables
-int dragging = 0;
-int mousePressed = 0;
-int mouseX = 0;
-int mouseY = 0;
-int ballCounter = 5;
-int score = 0;
-//flipper values
-int activateRFlipper=0;
-int activateLFlipper=0;
-int clockR = 0;
-int clockL = 0;
-int lockR = 0;
-int lockL = 0;
-float angleR = 25.0;
-float angleL = 25.0;
-
-
-
-/**
-    Prints given string in the screen
-
-    @param x the position of x
-    @param y the position of y
-    @param color the Color structure to be usded
-    @param str character array that wants to be printed
-
-*/
-void output(int x, int y, Color color, const char *str)
-{
-  glColor3f( color.r, color.g, color.b );
-  glRasterPos2f(x, y);
-  int len, i;
-  len = (int)strlen(str);
-  for (i = 0; i < len; i++) {
-    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
-  }
-}
-
-
-void initializeMaterials() {
-        // gris
-    bumperMaterial.ambient[0] = 0.135f;
-    bumperMaterial.ambient[1] = 0.2225f;
-    bumperMaterial.ambient[2] = 0.1575f;
-    bumperMaterial.ambient[3] = 1.0f;
-    bumperMaterial.diffuse[0] = 0.54f;
-    bumperMaterial.diffuse[1] = 0.89f;
-    bumperMaterial.diffuse[2] = 0.63f;
-    bumperMaterial.diffuse[3] = 1.0;
-    bumperMaterial.specular[0] = 0.316228f;
-    bumperMaterial.specular[1] = 0.316228f;
-    bumperMaterial.specular[2] = 0.316228f;
-    bumperMaterial.specular[3] = 1.0f;
-    bumperMaterial.shininess[0] = .1*128.0f;
-
-
-    pinballMaterial.ambient[0] = 0.19225f;
-    pinballMaterial.ambient[1] = 0.19225f;
-    pinballMaterial.ambient[2] = 0.19225f;
-    pinballMaterial.ambient[3] = 1.0f;
-    pinballMaterial.diffuse[0] = 0.50754f;
-    pinballMaterial.diffuse[1] = 0.50754f;
-    pinballMaterial.diffuse[2] = 0.50754f;
-    pinballMaterial.diffuse[3] = 1.0;
-    pinballMaterial.specular[0] = 0.508273f;
-    pinballMaterial.specular[1] = 0.508273f;
-    pinballMaterial.specular[2] = 0.508273f;
-    pinballMaterial.specular[3] = 1.0f;
-    pinballMaterial.shininess[0] = 51.2f;
-
-    holeMaterial.ambient[0] = 0.02f;
-    holeMaterial.ambient[1] = 0.02f;
-    holeMaterial.ambient[2] = 0.02f;
-    holeMaterial.ambient[3] = 1.0f;
-    holeMaterial.diffuse[0] = 0.01f;
-    holeMaterial.diffuse[1] = 0.01f;
-    holeMaterial.diffuse[2] = 0.01f;
-    holeMaterial.diffuse[3] = 1.0;
-    holeMaterial.specular[0] = 0.4f;
-    holeMaterial.specular[1] = 0.4f;
-    holeMaterial.specular[2] = 0.4f;
-    holeMaterial.specular[3] = 1.0f;
-    holeMaterial.shininess[0] = 10.0f;
-
-    wallMaterial.ambient[0] = 0.1745f;
-    wallMaterial.ambient[1] = 0.01175f;
-    wallMaterial.ambient[2] = 0.01175f;
-    wallMaterial.ambient[3] = 1.0f;
-    wallMaterial.diffuse[0] = 0.61424f;
-    wallMaterial.diffuse[1] = 0.04136f;
-    wallMaterial.diffuse[2] = 0.04136f;
-    wallMaterial.diffuse[3] = 1.0;
-    wallMaterial.specular[0] = 0.727811f;
-    wallMaterial.specular[1] = 0.626959f;
-    wallMaterial.specular[2] = 0.626959f;
-    wallMaterial.specular[3] = 1.0f;
-    wallMaterial.shininess[0] = 76.8f;
-
-};
-void changeMaterial(Material& material ) {
-
-    glMaterialfv(GL_FRONT,GL_AMBIENT,material.ambient);
-    glMaterialfv(GL_FRONT,GL_DIFFUSE,material.diffuse);
-    glMaterialfv(GL_FRONT,GL_SPECULAR,material.specular);
-    glMaterialfv(GL_FRONT,GL_SHININESS,material.shininess);
-}
-
-
-
-/**
-    Function that draws the circle in the screen given its position
-
-    @param p point in where the circle should be draw
-    @param radius of the circle to draw
-    @param c Color struct to paint the circle
-
-*/
-void drawCircle(Point& p, float radius, Color& c ) {
-
-    glPushMatrix();
-
-    changeMaterial(pinballMaterial);
-    glScaled(1,1,0.02);
-    glTranslated(p.x, p.y, 0);
-    glutSolidSphere(radius,15,15);
-	glPopMatrix();
-	lastPosition = p;
-
-}
-
-/**
-    Function that draws in the screen the bumper rectangle
-
-    @param p Point in which the bumper is located
-    @param radius of the bumper to draw
-    @param c Color structure containing r,g,b
-*/
-void drawBumper(Point& p, float radius, Color& c ) {
-
-	// draw circle
-
-    glPushMatrix();
-    changeMaterial(bumperMaterial);
-    glScaled(1,1.0,0.02);
-    glTranslated(p.x, p.y, 0);
-    glutSolidSphere(radius,40,40);
-	glPopMatrix();
-
-}
-
-
-/**
-    Checks if the ball collided with a bumper
-
-    @param p Point from where the bumper is located
-    @param type switch the different type of collitions,
-    1 = bumper (500), 2 = target (1000 score) 3 = top wall
-    4 = side walls ,  5 = upper side wall, 6 = outher wall
-    7 = draw hole,   8 = circle collision, 9 = flipper left
-    10 = flipper right
-
-*/
-void checkColission(Point &p, int type){
-
-    switch (type) {
-        case 1: { //bumper
-             // Distance to bumper
-            float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
-
-
-            if(d <= 22)
-            {
-
-
-
-                // do this when there is a collision
-                score += 500;
-                vx = -vx;
-                vy = 0.5;
-                vy = -vy ;
-
-            }
-        }
-        break;
-        case 2: { //target
-            if(p.y < currentPosition.y + 7 && (currentPosition.x > p.x && currentPosition.x < p.x + 20))
-            {
-                score += 1000;
-                vy = 0.5;
-                vy = -vy;
-            }
-        }
-        break;
-        case 3: { //top wall
-            if(p.y < currentPosition.y + 7)
-            {
-
-                vy = -vy;
-
-            }
-        }
-        break;
-        case 4: { //side walls
-            if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
-            {
-                // do this when there is collision with side of wall
-                vx = -vx;
-            }
-        }
-        break;
-        case 5: { //upper side wall
-            if(p.x < currentPosition.x + 7 && p.y + 400 > currentPosition.y)
-            {
-                // collision with side of wall
-                vx = -vx;
-            }
-        }
-        break;
-        case 6: { //outer sidewall
-            if(p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7)
-            {
-                // do this when there is collision with side of wall
-                vx = -vx;
-            }
-            else if(p.y + 440 < currentPosition.y - 7 || p.y > currentPosition.y + 7)
-            {
-                // do this when there is collision with top of wall
-                vy = 0.5;
-                vy = -vy;
-            }
-        }
-        break;
-
-        case 7: {
-             float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
-             if (d <= 22 && ballCounter > 0) {
-                // do this when there is a collision and there are no more balls left
-                ballCounter--;
-                cout << "Ball Counter: " << ballCounter << endl;
-                currentPosition.x = 280;
-                currentPosition.y = 77;
-                vx = -vx;
-                vy = -vy;
-            }
-        }
-        break;
-        case 8: { //circle collision
-            if((p.y < 1 || p.x > 300 || p.y > 440) && ballCounter > 0)
-            {
-                ballCounter--;
-                p.x = 280;
-                p.y = 77;
-                vx = -vx;
-                vy = -vy;
-            }
-            // If the ball is in the launching platform
-            if(p.x > 262)
-
-            {
-                // This is if the ball is still in the launching platform
-                if(p.y >= 420)
-                {
-                    vx = vy;
-
-                    p.x -= vx;
-                }
-                else
-                {
-                    // Launch the ball with that force depending on the launch
-                    vy = 0;
-                    vy += (launch/2000);
-                    p.y += vy;
-                }
-            }
-            else
-            {
-                acc = 0;
-                p.x -= vx;
-                // Caida
-                if(vy > 0){
-                    vy += g;
-                    vy -= f;
-                }
-                // Subiendo
-                else if(vy < 0){
-                    vy -= g;
-                    vy += f;
-                }
-                p.y -= vy;
-            }
-        }
-        break;
-        case 9: // flipper left
-
-
-           if(50  > currentPosition.y - 7 && ( currentPosition.x > 50 && currentPosition.x < 115 ))
-            {
-                cout << "Colision con flipper left " << endl;
-                // do this when there is collision with top of wall
-                vy = -vy;
-            }
-        break;
-        case 10: // flipper right
-
-
-
-           if(50 > currentPosition.y - 7 && ( currentPosition.x > 155 && currentPosition.x < 215 ))
-            {
-                cout << "Colision con flipper right " << endl;
-                // do this when there is collision with top of wall
-                vy = -vy;
-            }
-        break;
-
-
-    }
-
-}
-
-/**
-    Draws the hole in which the player looses one life
-
-    @param p Point in which hole is located
-    @param radius of the hole to draw
-    @param c Color structure containing r,g,b
-*/
-void drawHole(Point& p, float radius, Color& c ) {
-
-	glPushMatrix();
-    changeMaterial(holeMaterial);
-    glScaled(1,1,0.02);
-    glTranslated(p.x, p.y, 0);
-    glutSolidSphere(radius,15,15);
-	glPopMatrix();
-	lastPosition = p;
-}
-
-/**
-    Function that draws the target that gives 1000 score
-
-    @param p Point in which the target is defined
-    @param height of the target
-    @param width of the target
-    @param c Color to draw the target
-*/
-void drawTarget(Point& p, float height, float width, Color& c ) {
-
-	glColor3f(c.r, c.g, c.b);
-	glBegin( GL_POLYGON );
-	glVertex3f( p.x, p.y, 0 );
-	glVertex3f( p.x+width, p.y, 0 );
-	glVertex3f( p.x+width, p.y+height, 0 );
-	glVertex3f( p.x, p.y+height, 0 );
-	glEnd();
-}
-
-
-
-/**
-    Function used to draw any wall given point and sizes
-
-    @param p Point in which the rectangle should be
-    @param height of the rectangle
-    @param width of the rectangle
-    @param c Color structure in the form of r,g,b
-*/
-void drawWall(Point& p, float height, float width, Color& c ) {
-
-	// draw rectangle
-    glPushMatrix();
-    glColor3f(c.r, c.g, c.b);
-    changeMaterial(wallMaterial);
-    glTranslated(p.x, p.y, 0);
-    glScaled(width,height,0.05);
-    glutSolidCube(2);
-	glPopMatrix();
-
-}
-
-/**
-    Function that draws a given flipper
-
-    @param c Color structure containing r,g,b
-    @param f Flipper structure containing the values of the flipper.
-*/
-void drawFlipper( Color& c, Flipper& f ) {
-
-    //define flipper color
-    glColor3f(c.r, c.g, c.b);
-
-    //glBindTexture(GL_TEXTURE_2D, texName[0]);
-
-/*
-    glPushMatrix();
-    glColor3f(c.r, c.g, c.b);
-    changeMaterial(wallMaterial);
-    glTranslated(50, 50, 0);
-    glScaled(5,4,0.05);
-    glutSolidCube(2);
-	glPopMatrix();
-	*/
-
-	 glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texName[0]);
-    glDisable(GL_LIGHTING);
-
-	glBegin(GL_POLYGON);
-        //define vertices as the flipper's position
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex3f(f.backLeft.x, f.backLeft.y+20, .0);
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3f(f.backRight.x, f.backRight.y-20, .0 );
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3f(f.frontRight.x, f.frontRight.y-20,.0);
-
-        glVertex3f(f.frontTop.x, f.frontTop.y, .0);
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex3f(f.frontLeft.x, f.frontLeft.y+20, .0);
-    glEnd();
-    glEnable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-
-}
-
-/**
-    Makes the image into a texture, and returns the id of the texture
-*/
-
-void loadTexture(Image* image, int k)
-{
-
-    glBindTexture(GL_TEXTURE_2D, texName[k]); //Tell OpenGL which texture to edit
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-
-    //Map the image to the texture
-    glTexImage2D(GL_TEXTURE_2D,                //Always GL_TEXTURE_2D
-                 0,                            //0 for now
-                 GL_RGB,                       //Format OpenGL uses for image
-                 image->width, image->height,  //Width and height
-                 0,                            //The border of the image
-                 GL_RGB, //GL_RGB, because pixels are stored in RGB format
-                 GL_UNSIGNED_BYTE, //GL_UNSIGNED_BYTE, because pixels are stored
-                 //as unsigned numbers
-                 image->pixels);               //The actual pixel data
-
-}
-
-
-/**
-    Function that preloads textures
-*/
-/*
-void initRendering(){
-    Image* image;
-    glEnable(GL_TEXTURE_2D);
-
-    glGenTextures(36, texName); //Make room for our texture
-    image = loadBMP("C:/Users/SergioJesúsCorderoBa/Documents/ITESM/graficos/12a Semana GC/12a Semana GC/ojo.bmp");
-    loadTexture(image,0);
-    delete image;
-
-}
-*/
 
 /**
     Function used as Display. Called every time there
@@ -779,96 +43,100 @@ void display(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
+	if(gameState == 0){
+        drawMenu(25, 400, black, blue, green);
+	} else{
 
-	//drawRectangle(origin, 450, 300, dRed);
-   glPushMatrix();
- //  glRotated(10,0,1,0);
+        //drawRectangle(origin, 450, 300, dRed);
+      glPushMatrix();
+        //  glRotated(10,0,1,0);
 
-	//draw flippers
-	drawFlipper(white, lFlipper);
-	drawFlipper(white, rFlipper);
+        //draw flippers
+        drawFlipper(white, lFlipper);
+        drawFlipper(white, rFlipper);
 
-	// obstacles
+        // obstacles
+        drawBumper(bumper1,15,gold); // bumper1
+        drawBumper(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        drawBumper(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        drawBumper(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
 
-	drawBumper(bumper1,15,gold); // bumper1
-	drawBumper(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-	drawBumper(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-	drawBumper(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-
-	drawTarget(target1, 5, 20, green); // target1
-	drawTarget(target2, 5, 20, green); // target2
-	drawHole(hole1,10,black); // hole1
-	drawHole(hole2,10,black); // hole2
-	drawCircle(currentPosition,circleRadius,grey); // the pinball
-
-
-	drawWall(upperWall,10,600,red); // top wall
-	drawWall(leftWall,440,10,red); // left playspace wall
-	drawWall(holeWallLeft,110,10,red); // left hole wall
-	drawWall(holeWallRight,110,10,red); // right hole wall
-	drawWall(rightWall,400,10,red); // right playspace wall
-	drawWall(farRightWall,440,5,red); // right playspace wall
-	drawWall(insertWall,10,20,red); // wall under ball in starting position
+        drawTarget(target1, 5, 20, green); // target1
+        drawTarget(target2, 5, 20, green); // target2
+        drawHole(hole1,10,black); // hole1
+        drawHole(hole2,10,black); // hole2
+        drawCircle(currentPosition,circleRadius,grey); // the pinball
 
 
-    checkColission(bumper1, 1);
-	checkColission(bumper2, 1);
-	checkColission(bumper3, 1);
-	checkColission(bumper4, 1);
-	checkColission(target1, 2);
-	checkColission(target2, 2);
-    checkColission(upperWall,3);
-    checkColission(holeWallLeft,4);
-	checkColission(holeWallRight,4);
-    checkColission(rightWall, 5);
-    checkColission(leftWall, 6);
-    checkColission(farRightWall, 6);
-    checkColission(hole1, 7);
-    checkColission(hole2, 7);
-    checkColission(currentPosition, 8);
-    checkColission(bumper1, 9);
-    checkColission(bumper1, 10);
-
-	// plunger mechanism
-	glBegin(GL_POLYGON);
-		glColor3f(white.r,white.g, white.b);
-		glVertex2f(270,60);
-		glVertex2f(290,60);
-		if(dragging)
-		{
-			launch = 0;
-			acc += 5;
-			glVertex2f(290, screenHeight - mouseY);
-			glVertex2f(270, screenHeight - mouseY);
-		}
-		else
-		{
-			launch = acc;
-			glVertex2f(290,40);
-			glVertex2f(270,40);
-		}
-	glEnd();
-	// angled wall for insertion
+        drawWall(upperWall,10,600,red); // top wall
+        drawWall(leftWall,440,10,red); // left playspace wall
+        drawWall(holeWallLeft,110,10,red); // left hole wall
+        drawWall(holeWallRight,110,10,red); // right hole wall
+        drawWall(rightWall,400,10,red); // right playspace wall
+        drawWall(farRightWall,440,5,red); // right playspace wall
+        drawWall(insertWall,10,20,red); // wall under ball in starting position
 
 
-    glColor3f(red.r, red.g, red.b);
-    changeMaterial(wallMaterial);
-	glBegin(GL_TRIANGLES);
+        checkColission(bumper1, 1);
+        checkColission(bumper2, 1);
+        checkColission(bumper3, 1);
+        checkColission(bumper4, 1);
+        checkColission(target1, 2);
+        checkColission(target2, 2);
+        checkColission(upperWall,3);
+        checkColission(holeWallLeft,4);
+        checkColission(holeWallRight,4);
+        checkColission(rightWall, 5);
+        checkColission(leftWall, 6);
+        checkColission(farRightWall, 6);
+        checkColission(hole1, 7);
+        checkColission(hole2, 7);
+        checkColission(currentPosition, 8);
+        checkColission(bumper1, 9);
+        checkColission(bumper1, 10);
 
-        glVertex3f(270, 440, 1.0);
-        glVertex3f(290, 440, 1.0);
-        glVertex3f(290, 420, 1.0);
-    glEnd();
 
-	stringstream ss;
-	ss << "Score: " << score;
-	output(10,460,white,ss.str().c_str());
+        // plunger mechanism
+        glBegin(GL_POLYGON);
+            glColor3f(white.r,white.g, white.b);
+            glVertex2f(270,60);
+            glVertex2f(290,60);
+            if(dragging)
+            {
+                launch = 0;
+                acc += 5;
+                glVertex2f(290, screenHeight - mouseY);
+                glVertex2f(270, screenHeight - mouseY);
+            }
+            else
+            {
+                launch = acc;
+                glVertex2f(290,40);
+                glVertex2f(270,40);
+            }
+        glEnd();
+        // angled wall for insertion
 
-	stringstream bs;
-	bs << "Balls: " << ballCounter;
-	output(200,460,white,bs.str().c_str());
 
-glPopMatrix();
+        glColor3f(red.r, red.g, red.b);
+        changeMaterial(wallMaterial);
+        glBegin(GL_TRIANGLES);
+
+            glVertex3f(270, 440, 1.0);
+            glVertex3f(290, 440, 1.0);
+            glVertex3f(290, 420, 1.0);
+        glEnd();
+
+        stringstream ss;
+        ss << "Score: " << score;
+        output(10,460,white,ss.str().c_str());
+
+        stringstream bs;
+        bs << "Balls: " << ballCounter;
+        output(200,460,white,bs.str().c_str());
+
+        glPopMatrix();
+	}
 	glutSwapBuffers();
 }
 
@@ -930,7 +198,7 @@ void init(void)
     grey.r = 0.827451; grey.g = 0.827451; grey.b = 0.827451;
     dRed.r = 0.545098; dRed.g = 0; dRed.b = 0;
     gold.r = 0.721569; gold.g = 0.52549; gold.b = 0.0431373;
-    black.r = 0.0; black.g = 0.0; black.b = 0.0;
+    black.r = 0.0001; black.g = 0.0001; black.b = 0.0001;
     blue.r = 0.372549; blue.g = 0.619608; blue.b = 0.627451;
     green.r = 0.180392; green.g = 0.545098; green.b = 0.341176;
     white.r = 1.0f; white.g = 1.0f; white.b = 1.0f;
@@ -974,7 +242,7 @@ void init(void)
 
 
     // asigna la apropiada fuente de luz
-   GLfloat lightIntensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    GLfloat lightIntensity[] = {0.7f, 0.7f, 0.7f, 1.0f};
     //GLfloat light_position[] = {1.0f, 1.0f, 3.0f, 0.0f};
     GLfloat light_position[] = {1.0f, 1.0f, 3.0f, 0.0f};
     glLightfv(GL_LIGHT0, GL_POSITION,light_position);
@@ -984,13 +252,15 @@ void init(void)
 
     glClearColor (0.5, 0.5, 0.5, 1.0);
 
+
+
     glEnable(GL_TEXTURE_2D);
 
     GLuint i=0;
     glGenTextures(1, texName); //Make room for our texture
     Image* image;
-    image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
-  //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\12a Semana GC\\12a Semana GC\\banderas\\bandera alemania.bmp");
+    //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
+    image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
     loadTexture(image,i++);
 
 
@@ -999,82 +269,31 @@ void init(void)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, screenWidth, 0, screenHeight, 0, 1);
-	initialPosition.x = 285;	initialPosition.y = 77;
-	currentPosition = initialPosition;
+    initialPosition.x = 285;	initialPosition.y = 77;
+    currentPosition = initialPosition;
 
 	flipperPositions();
 }
 
-/**
-    Function used to check if the mouse was pressed
-
-    @param button left mouse button
-    @param state
-    @param x position of the click
-    @param y position of the click
-*/
-void mousePress( int button, int state, int x, int y) {
-	if (button != 0 ) {  // left mouse button pressed?
-		mousePressed = 1;
-
-	} else { mousePressed = 0;
-		dragging = 0;
-	}
-}
-
-/**
-    Function used to check if the mouse is dragged
 
 
-    @param x position of the drag
-    @param y position of the drag
-*/
-void mouseDrag( int x, int y) {
+void reshape(int ancho, int alto) {
+    glViewport(0,0,ancho, alto);
 
-	mousePressed = 1;
-	dragging = 1;
-	mouseX = x;
-	mouseY = y;
-}
-
-/**
-    Function to check the position of the mouse
-    at any time.
-
-    @param x position of mouse in x axis at any time
-    @param y position of mouse in y axis at any time
-*/
-void mouseMovement( int x, int y) {
-
-	mousePressed = 0;
-	dragging = 0;
-	mouseX = x;
-	mouseY = y;
-}
+    //double winHt = 1.0;//altura mitad de la ventana. Probar con valores 0.5, 0.25, 0.125
+    //glOrtho(-winHt*64/48.0, winHt*64/48.0, -winHt, winHt, 0.1,100.0);
 
 
-/**
-    Function used to activate any of the flippers
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+   // glOrtho(0, screenWidth, 0, screenHeight, 5, 200);
+    glFrustum(0, screenWidth, 0, screenHeight, 6, 200);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-    @param type flipper to check.
-            1 = left, 2 = right
-*/
-void activateFlipper(int type){
-    switch (type) {
-        case 1: {
-            if(lockL != 1){
-                activateLFlipper = 1;
-            }
-        }
-        break;
-
-        case 2: {
-            if(lockR != 1){
-                activateRFlipper = 1;
-            }
-        }
-        break;
-    }
+    gluLookAt(0.0, 0.0, 6.2, //eye
+              0.0, 0.0, 0.0, //center
+              0.0, 1.0, 7.0);//up
 }
 
 /**
@@ -1136,62 +355,6 @@ void myTimer(int v){
     glutTimerFunc(5, myTimer, 1);
 
 }
-/**
-    Keyboard function used in the code.
-    If f is pressed, activate left flipper
-    If j is pressed, activate right flipper
-    If e is pressed, exit
-
-    @param theKey unsigned char representing the key pressed
-    @param mouseX position of the mouse in x axis
-    @param mouseY position of the mouse in y axis
-*/
-void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
-{
-    GLint x = mouseX;
-    GLint y = screenHeight - mouseY; // openGL coordinates
-    switch (theKey)
-    {
-    case 'f':
-    case 'F':
-        activateFlipper(1);
-        break;
-    case 'j':
-    case 'J':
-        activateFlipper(2);
-        break;
-    case 'e':
-    case 'E':
-    case 27:
-          exit(-1);
-        //terminate the program
-    default:
-        break;
-    }
-    glutPostRedisplay();
-}
-
-
-void reshape(int ancho, int alto) {
-    glViewport(0,0,ancho, alto);
-
-    //double winHt = 1.0;//altura mitad de la ventana. Probar con valores 0.5, 0.25, 0.125
-    //glOrtho(-winHt*64/48.0, winHt*64/48.0, -winHt, winHt, 0.1,100.0);
-
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-   // glOrtho(0, screenWidth, 0, screenHeight, 5, 200);
-    glFrustum(0, screenWidth, 0, screenHeight, 6, 200);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    gluLookAt(.0,.0,6.2, //eye
-              .0,.0,0,  //center
-              0,1,7);//up
-
-
-}
 
 // main method
 int main(int argc, char *argv[])
@@ -1213,223 +376,3 @@ int main(int argc, char *argv[])
 	glutMainLoop();
 	return 0;
 }
-
-
-#include <assert.h>
-#include <fstream>
-
-#include "imageloader.h"
-
-using namespace std;
-
-Image::Image(char* ps, int w, int h) : pixels(ps), width(w), height(h)
-{
-
-}
-
-Image::~Image()
-{
-    delete[] pixels;
-}
-
-namespace
-{
-//Converts a four-character array to an integer, using little-endian form
-    int toInt(const char* bytes)
-    {
-        return (int)(((unsigned char)bytes[3] << 24) |
-                     ((unsigned char)bytes[2] << 16) |
-                     ((unsigned char)bytes[1] << 8) |
-                     (unsigned char)bytes[0]);
-    }
-
-//Converts a two-character array to a short, using little-endian form
-    short toShort(const char* bytes)
-    {
-        return (short)(((unsigned char)bytes[1] << 8) |
-                       (unsigned char)bytes[0]);
-    }
-
-//Reads the next four bytes as an integer, using little-endian form
-    int readInt(ifstream &input)
-    {
-        char buffer[4];
-        input.read(buffer, 4);
-        return toInt(buffer);
-    }
-
-//Reads the next two bytes as a short, using little-endian form
-    short readShort(ifstream &input)
-    {
-        char buffer[2];
-        input.read(buffer, 2);
-        return toShort(buffer);
-    }
-
-//Just like auto_ptr, but for arrays
-    template<class T>
-    class auto_array
-    {
-    private:
-        T* array;
-        mutable bool isReleased;
-    public:
-        explicit auto_array(T* array_ = NULL) :
-                array(array_), isReleased(false)
-        {
-        }
-
-        auto_array(const auto_array<T> &aarray)
-        {
-            array = aarray.array;
-            isReleased = aarray.isReleased;
-            aarray.isReleased = true;
-        }
-
-        ~auto_array()
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-        }
-
-        T* get() const
-        {
-            return array;
-        }
-
-        T &operator*() const
-        {
-            return *array;
-        }
-
-        void operator=(const auto_array<T> &aarray)
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-            array = aarray.array;
-            isReleased = aarray.isReleased;
-            aarray.isReleased = true;
-        }
-
-        T* operator->() const
-        {
-            return array;
-        }
-
-        T* release()
-        {
-            isReleased = true;
-            return array;
-        }
-
-        void reset(T* array_ = NULL)
-        {
-            if (!isReleased && array != NULL)
-            {
-                delete[] array;
-            }
-            array = array_;
-        }
-
-        T* operator+(int i)
-        {
-            return array + i;
-        }
-
-        T &operator[](int i)
-        {
-            return array[i];
-        }
-    };
-}
-
-Image* loadBMP(const char* filename)
-{
-    ifstream input;
-    input.open(filename, ifstream::binary);
-    assert(!input.fail() || !"Could not find file");
-    char buffer[2];
-    input.read(buffer, 2);
-    assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
-    input.ignore(8);
-    int dataOffset = readInt(input);
-
-    //Read the header
-    int headerSize = readInt(input);
-    int width;
-    int height;
-    switch (headerSize)
-    {
-    case 40:
-        //V3
-        width = readInt(input);
-        height = readInt(input);
-        input.ignore(2);
-        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-        assert(readShort(input) == 0 || !"Image is compressed");
-        break;
-    case 12:
-        //OS/2 V1
-        width = readShort(input);
-        height = readShort(input);
-        input.ignore(2);
-        assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-        break;
-    case 64:
-        //OS/2 V2
-        assert(!"Can't load OS/2 V2 bitmaps");
-        break;
-    case 108:
-        //Windows V4
-        assert(!"Can't load Windows V4 bitmaps");
-        break;
-    case 124:
-        //Windows V5
-        assert(!"Can't load Windows V5 bitmaps");
-        break;
-    default:
-        assert(!"Unknown bitmap format");
-    }
-
-    //Read the data
-    int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
-    int size = bytesPerRow * height;
-    auto_array<char> pixels(new char[size]);
-    input.seekg(dataOffset, ios_base::beg);
-    input.read(pixels.get(), size);
-
-    //Get the data into the right format
-    auto_array<char> pixels2(new char[width * height * 3]);
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int c = 0; c < 3; c++)
-            {
-                pixels2[3 * (width * y + x) + c] =
-                    pixels[bytesPerRow * y + 3 * x + (2 - c)];
-            }
-        }
-    }
-
-    input.close();
-    return new Image(pixels2.release(), width, height);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
