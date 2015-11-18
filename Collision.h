@@ -60,7 +60,7 @@ void checkColission(Point &p, int type){
 
             if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
             {
-                if (p.x + 10 < currentPosition.x - 7 && p.x > currentPosition.x + 7 && currentPosition.y <= 110 ) {
+                if (p.x + 10 < currentPosition.x  && p.x > currentPosition.x  && currentPosition.y <= 110 ) {
                     cout << "Choco por arriba" << endl;
                     vy = -vy;
                 }
