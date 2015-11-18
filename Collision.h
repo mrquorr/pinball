@@ -23,16 +23,33 @@
     7 = draw hole,   8 = circle collision
 
 */
-void checkColission(Point &p, int type){
+void checkColission(Point &p, int type, int typeBumper){
 
     switch (type) {
         case 1: { //bumper
              // Distance to bumper
             float d = sqrt((pow(p.x - currentPosition.x, 2)) + (pow(p.y - currentPosition.y, 2)));
 
+
             if(d <= 22)
             {
                 // do this when there is a collision
+                if (typeBumper == 1) {
+                    careerCounter ++;
+
+                    if (careerCounter%2==0) {
+                        careerLevel++;
+                        score+= 5000;
+                    }
+                }
+                else if ( typeBumper == 2 ) {
+                    familyCounter++;
+
+                    if (familyCounter%2==0) {
+                        familyLevel++;
+                        score+= 5000;
+                    }
+                }
                 score += 500;
                 vx = -vx;
                 vy = 0.5;
@@ -57,10 +74,20 @@ void checkColission(Point &p, int type){
         }
         break;
         case 4: { //side walls
-            if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110)
+            if (p.x - 10 < currentPosition.x   && p.x + 20 > currentPosition.x && currentPosition.y < 110) {
+
+                    vy = -vy;
+                }
+
+            if((p.x + 10 < currentPosition.x - 7 || p.x > currentPosition.x + 7) && currentPosition.y < 110 && currentPosition.y > 30)
             {
-                // do this when there is collision with side of wall
-                vx = -vx;
+
+
+                    //cout << p.x + 10 << " y " << currentPosition.x - 7 <<  " y " << currentPosition.y << endl;
+                    // do this when there is collision with side of wall
+                    vx = -vx;
+
+
             }
         }
         break;
@@ -153,7 +180,6 @@ void checkColission(Point &p, int type){
 
            if(50  > currentPosition.y - 7 && ( currentPosition.x > 50 && currentPosition.x < 115 ))
             {
-                cout << "Colision con flipper left " << endl;
                 // do this when there is collision with top of wall
                 vy = -vy;
             }
@@ -164,7 +190,6 @@ void checkColission(Point &p, int type){
 
            if(50 > currentPosition.y - 7 && ( currentPosition.x > 155 && currentPosition.x < 215 ))
             {
-                cout << "Colision con flipper right " << endl;
                 // do this when there is collision with top of wall
                 vy = -vy;
             }

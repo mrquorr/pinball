@@ -43,7 +43,7 @@ struct Material {
 Color red, grey, dRed, gold, black, blue, green, white;
 
 // Materials
-Material bumperMaterial, pinballMaterial, holeMaterial, wallMaterial;
+Material bumperMaterial, pinballMaterial, holeMaterial, wallMaterial, bumper2Material;
 
 // Points
 Point origin, leftFlipper, rightFlipper, upperWall, leftWall,holeWallLeft;
@@ -92,7 +92,7 @@ int mouseX = 0;
 int mouseY = 0;
 
 // game variables
-int ballCounter = 5;
+int ballCounter = 3;
 int score = 0;
 int gameState = 0;
 int prevGameState;
@@ -101,6 +101,8 @@ bool gameOver = false;
 int familyLevel = 0;
 int careerLevel = 0;
 int r = 0;
+int careerCounter = 0;
+int familyCounter = 0;
 
 //flipper values
 int activateRFlipper=0;
@@ -114,19 +116,35 @@ float angleL = 25.0;
 
 void initializeMaterials() {
         // gris
-    bumperMaterial.ambient[0] = 0.135f;
-    bumperMaterial.ambient[1] = 0.2225f;
-    bumperMaterial.ambient[2] = 0.1575f;
+    bumperMaterial.ambient[0] = 0.0f;
+    bumperMaterial.ambient[1] = 0.0f;
+    bumperMaterial.ambient[2] = 0.0f;
     bumperMaterial.ambient[3] = 1.0f;
-    bumperMaterial.diffuse[0] = 0.54f;
-    bumperMaterial.diffuse[1] = 0.89f;
-    bumperMaterial.diffuse[2] = 0.63f;
+    bumperMaterial.diffuse[0] = 0.1f;
+    bumperMaterial.diffuse[1] = 0.35f;
+    bumperMaterial.diffuse[2] = 0.1f;
     bumperMaterial.diffuse[3] = 1.0;
-    bumperMaterial.specular[0] = 0.316228f;
-    bumperMaterial.specular[1] = 0.316228f;
-    bumperMaterial.specular[2] = 0.316228f;
+    bumperMaterial.specular[0] = 0.45f;
+    bumperMaterial.specular[1] = 0.55f;
+    bumperMaterial.specular[2] = 0.45f;
     bumperMaterial.specular[3] = 1.0f;
-    bumperMaterial.shininess[0] = .1*128.0f;
+    bumperMaterial.shininess[0] = 32.0f;
+
+
+    // rojo plastico
+    bumper2Material.ambient[0] = 0.0f;
+    bumper2Material.ambient[1] = 0.0f;
+    bumper2Material.ambient[2] = 0.0f;
+    bumper2Material.ambient[3] = 1.0f;
+    bumper2Material.diffuse[0] = 0.5f;
+    bumper2Material.diffuse[1] = 0.0f;
+    bumper2Material.diffuse[2] = 0.0f;
+    bumper2Material.diffuse[3] = 1.0;
+    bumper2Material.specular[0] = 0.7f;
+    bumper2Material.specular[1] = 0.6f;
+    bumper2Material.specular[2] = 0.6f;
+    bumper2Material.specular[3] = 1.0f;
+    bumper2Material.shininess[0] = 32.0f;
 
 
     pinballMaterial.ambient[0] = 0.19225f;

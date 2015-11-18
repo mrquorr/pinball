@@ -42,16 +42,37 @@ void drawCircle(Point& p, float radius, Color& c ) {
     @param radius of the bumper to draw
     @param c Color structure containing r,g,b
 */
-void drawBumper(Point& p, float radius, Color& c ) {
+void drawBumperGreen(Point& p, float radius, Color& c ) {
+
 
 	// draw circle
     glPushMatrix();
         changeMaterial(bumperMaterial);
         glScaled(1.0, 1.0, 0.02);
-        glTranslated(p.x, p.y, 0);
+        glTranslated(p.x, p.y, -10);
         glutSolidSphere(radius,40,40);
 	glPopMatrix();
 }
+
+/**
+    Function that draws in the screen the bumper rectangle
+
+    @param p Point in which the bumper is located
+    @param radius of the bumper to draw
+    @param c Color structure containing r,g,b
+*/
+void drawBumperRed(Point& p, float radius, Color& c ) {
+
+
+	// draw circle
+    glPushMatrix();
+        changeMaterial(bumper2Material);
+        glScaled(1.0, 1.0, 0.02);
+        glTranslated(p.x, p.y, -10);
+        glutSolidSphere(radius,40,40);
+	glPopMatrix();
+}
+
 
 /**
     Draws the hole in which the player looses one life

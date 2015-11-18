@@ -54,17 +54,17 @@ void display(void)
 
         //drawRectangle(origin, 450, 300, dRed);
       glPushMatrix();
-        //  glRotated(10,0,1,0);
+      //glRotated(-.04,1,0,0);
 
         //draw flippers
         drawFlipper(white, lFlipper);
         drawFlipper(white, rFlipper);
 
         // obstacles
-        drawBumper(bumper1,15,gold); // bumper1
-        drawBumper(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-        drawBumper(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
-        drawBumper(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        drawBumperGreen(bumper1,15,gold); // bumper1
+        drawBumperGreen(bumper2,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        drawBumperRed(bumper3,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
+        drawBumperRed(bumper4,15,gold); // bumper2glColor3f (1.0, 1.0, 1.0);
 
         drawTarget(target1, 5, 20, green); // target1
         drawTarget(target2, 5, 20, green); // target2
@@ -82,23 +82,23 @@ void display(void)
         drawWall(insertWall,10,20,red); // wall under ball in starting position
 
 
-        checkColission(bumper1, 1);
-        checkColission(bumper2, 1);
-        checkColission(bumper3, 1);
-        checkColission(bumper4, 1);
-        checkColission(target1, 2);
-        checkColission(target2, 2);
-        checkColission(upperWall,3);
-        checkColission(holeWallLeft,4);
-        checkColission(holeWallRight,4);
-        checkColission(rightWall, 5);
-        checkColission(leftWall, 6);
-        checkColission(farRightWall, 6);
-        checkColission(hole1, 7);
-        checkColission(hole2, 7);
-        checkColission(currentPosition, 8);
-        checkColission(bumper1, 9);
-        checkColission(bumper1, 10);
+        checkColission(bumper1, 1,1);
+        checkColission(bumper2, 1,1);
+        checkColission(bumper3, 1,2);
+        checkColission(bumper4, 1,2);
+        checkColission(target1, 2, 0);
+        checkColission(target2, 2, 0 );
+        checkColission(upperWall,3, 0);
+        checkColission(holeWallLeft,4, 0);
+        checkColission(holeWallRight,4, 0);
+        checkColission(rightWall, 5, 0);
+        checkColission(leftWall, 6, 0);
+        checkColission(farRightWall, 6, 0);
+        checkColission(hole1, 7, 0);
+        checkColission(hole2, 7, 0);
+        checkColission(currentPosition, 8, 0 );
+        checkColission(bumper1, 9, 0);
+        checkColission(bumper1, 10, 0);
 
 
         // plunger mechanism
@@ -262,11 +262,17 @@ void init(void)
     glEnable(GL_TEXTURE_2D);
 
     GLuint i=0;
-    glGenTextures(1, texName); //Make room for our texture
+    glGenTextures(2, texName); //Make room for our texture
     Image* image;
     //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\img\\left.bmp");
     image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
     loadTexture(image,i++);
+
+
+    //image = loadBMP("C:\\Users\\Fabiola\\Dropbox\\Tec\\Septimo_semestre\\Graficos Computacionales\\Proyecto Pinball\\pinball\\src\\heart.bmp");
+    image = loadBMP("C:\\Users\\SergioJesúsCorderoBa\\Documents\\ITESM\\graficos\\pinball\\src\\left.bmp");
+    loadTexture(image,i++);
+
 
 
     delete image;

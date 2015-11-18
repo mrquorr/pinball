@@ -83,8 +83,6 @@ void activateFlipper(int type){
     Function to start a game
 */
 void start(){
-    srand (time(NULL));
-    int r = rand() % 20;
     if(gameState == 0){
         gameState = 1;
         score = 0;
@@ -104,8 +102,6 @@ void start(){
     Function to end a game
 */
 void finish(){
-    srand (time(NULL));
-    r = rand() % 20;
     if(gameState == 0){
         cout << "Error, action not allowed" << endl;
     } else if(gameState == 1 || gameState == 2){
@@ -123,13 +119,10 @@ void finish(){
     Function to pause a game
 */
 void pause(){
-    srand (time(NULL));
-    r = rand() % 20;
     if(gameState == 0){
         cout << "Error, action not allowed" << endl;
     } else if(gameState == 1){
         isPaused = true;
-        srand (time(NULL));
         gameState = 2;
     } else if(gameState == 2){
         isPaused = false;

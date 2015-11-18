@@ -22,7 +22,7 @@ string tipsArray[20] = {"Sin globito no hay fiesta", "Cuidado, el SIDA si da", "
                         "Lavados vaginales, mejor compra paniales", "Marcha atras, esperen ser papas", "Durante de la menstruacion, lo dejaste en manos del senior",
                         "Pildora del dia, acaba en camilla", "Huele a pescado, dejalo vetado", "Granos y una verruga, mejor pega a la fuga", "Pus amarilla, huye a la esquina",
                         "Globo usado, globo tronado", "Planea tu familia, seras feliz en tus dias", "Checate seguido, no caigas en el descuido"};
-//int r = rand() % 20;
+
 
 
 /**
@@ -109,6 +109,8 @@ void drawMenu(float x, float y, Color& background, Color& title, Color& words){
 
     output(x, y-(8*wordJump), 0.1, "Sergio Cordero A01191167", 0.08);
     output(x, y-(9*wordJump), 0.1, "Emilio Flores A01035087", 0.08);
+    //string tip = tipsArray[5];
+    output(x, y-(5*wordJump), 0.1, "La del dia no, envez la pildora del mes", 0.08);
 
     glEnable(GL_LIGHTING);
 }
@@ -135,7 +137,7 @@ void drawPause(float x, float y, Color& background, Color& title, Color& words){
     output(x, y-(3*wordJump), 0.1, "Pausa - P", 0.15);
     output(x, y-(4*wordJump), 0.1, "Iniciar - I", 0.15);
     output(x, y-(5*wordJump), 0.1, "Como jugar - O", 0.15);
-
+    
     outputTip(x, y, words, 6);
     outputScore(x, y, words, 8);
 
@@ -179,6 +181,7 @@ void drawInformation(float x, float y, Color& background, Color& title, Color& w
 
     outputTip(x, y, words, 10);
     //outputScore(x, y, words, 10);
+    output(x, y-(5*wordJump), 0.1, "Marcha atras, esperen ser papas", 0.08);
 
     glEnable(GL_LIGHTING);
 }
@@ -233,6 +236,10 @@ void drawGameover(float x, float y, Color& background, Color& title, Color& word
     outputScore(x, y, words, 4);
     output(x, y-(5*wordJump), 0.1, "Iniciar un nuevo juego - I", 0.1);
     outputTip(x, y, words, 6);
+    output(x, y-(4*wordJump), 0.1, "Puntaje: 40", 0.15);
+    output(x, y-(5*wordJump), 0.1, "Iniciar un nuevo juego - I", 0.1);
+
+    output(x, y-(6*wordJump), 0.1, "Hablar sobre sexo, mejor en exceso", 0.08);
 
     glEnable(GL_LIGHTING);
 }
