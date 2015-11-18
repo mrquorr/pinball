@@ -45,7 +45,11 @@ void display(void)
 	glEnable(GL_TEXTURE_2D);
 	if(gameState == 0){
         drawMenu(25, 400, black, blue, green);
-	} else{
+	} else if(gameState == 2){
+        drawPause(25, 400, black, red, blue);
+    } else if(gameState == 3){
+        drawGameover(25, 400, white, red, black);
+    }else if(gameState == 1){
 
         //drawRectangle(origin, 450, 300, dRed);
       glPushMatrix();
@@ -140,10 +144,10 @@ void display(void)
 	glutSwapBuffers();
 }
 
+
+
 /**
     Function to be used when there is nothing going on
-
-
 */
 void idle (void)
 {
@@ -303,7 +307,7 @@ void reshape(int ancho, int alto) {
 */
 void gravity(int v){
     if(isMoving){
-        currVelY -= 0.01;
+        currVelY -= 0.07;
     } else {
         currVelY = 0.0;
     }
@@ -353,7 +357,6 @@ void myTimer(int v){
         glutPostRedisplay();
     }
     glutTimerFunc(5, myTimer, 1);
-
 }
 
 // main method
@@ -369,8 +372,8 @@ int main(int argc, char *argv[])
 	glutMotionFunc(mouseDrag);
 	glutReshapeFunc(reshape);
 	glutPassiveMotionFunc( mouseMovement );
-	glutTimerFunc(5, myTimer, 1);
-	glutTimerFunc(2, gravity, 1);
+    glutTimerFunc(5, myTimer, 1);
+    glutTimerFunc(2, gravity, 1);
 	glutKeyboardFunc(myKeyboard);
 	init();
 	glutMainLoop();

@@ -94,7 +94,11 @@ int mouseY = 0;
 // game variables
 int ballCounter = 5;
 int score = 0;
-int gameState = 1;
+int gameState = 0;
+bool isPaused = false;
+bool gameOver = false;
+int familyLevel = 4;
+int careerLevel = 2;
 
 //flipper values
 int activateRFlipper=0;

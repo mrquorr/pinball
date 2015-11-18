@@ -79,6 +79,55 @@ void activateFlipper(int type){
     }
 }
 
+/**
+    Function to start a game
+*/
+void start(){
+    if(gameState == 0){
+        gameState = 1;
+        score = 0;
+        ballCounter = 5;
+    } else if(gameState == 1 || gameState == 2){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 3){
+        gameState = 1;
+        score = 0;
+        ballCounter = 5;
+    }
+}
+
+/**
+    Function to end a game
+*/
+void finish(){
+    if(gameState == 0){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 1 || gameState == 2){
+        gameState = 3;
+        ballCounter = 0;
+        gameOver = true;
+    } else if(gameState == 3){
+        cout << "Error, action not allowed" << endl;
+    }
+}
+
+/**
+    Function to pause a game
+*/
+void pause(){
+    if(gameState == 0){
+        cout << "Error, action not allowed" << endl;
+    } else if(gameState == 1){
+        isPaused = true;
+        gameState = 2;
+    } else if(gameState == 2){
+        isPaused = false;
+        gameState = 1;
+    } else if(gameState == 3){
+        cout << "Error, action not allowed" << endl;
+    }
+}
+
 
 /**
     Keyboard function used in the code.
@@ -103,6 +152,18 @@ void myKeyboard(unsigned char theKey, int mouseX, int mouseY)
     case 'j':
     case 'J':
         activateFlipper(2);
+        break;
+    case 'T':
+    case 't':
+        finish();
+        break;
+    case 'P':
+    case 'p':
+        pause();
+        break;
+    case 'I':
+    case 'i':
+        start();
         break;
     case 'e':
     case 'E':
